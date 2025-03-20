@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// Define the API base URL - Using proxy from vite.config.js
-const API_BASE_URL = '/api';
+// Define the API base URL - Using direct URL instead of proxy
+const API_BASE_URL = 'https://netviz-backend.onrender.com/api';
 
 export const scanDomain = async (domain) => {
   try {
@@ -103,28 +103,7 @@ export const getNetworkInfo = async (domain) => {
   }
 };
 
-// New IPINFO API endpoints
-export const getIpInfo = async (ip) => {
-  try {
-    const response = await axios.get(`${API_BASE_URL}/ipinfo/ip/${ip}`);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching IP info:', error);
-    throw error;
-  }
-};
-
-export const getAsnInfo = async (asn) => {
-  try {
-    const response = await axios.get(`${API_BASE_URL}/ipinfo/asn/${asn}`);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching ASN info:', error);
-    throw error;
-  }
-};
-
-// New SHODAN API endpoints
+// SHODAN API endpoints
 export const getShodanHostInfo = async (ip) => {
   try {
     const response = await axios.get(`${API_BASE_URL}/shodan/host/${ip}`);

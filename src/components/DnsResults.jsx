@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FaServer, FaExclamationTriangle, FaInfoCircle, FaCopy, FaGlobe, FaSearch, FaMapMarkerAlt, FaNetworkWired, FaBuilding, FaUser } from 'react-icons/fa';
+import { FaServer, FaExclamationTriangle, FaInfoCircle, FaCopy, FaGlobe, FaSearch } from 'react-icons/fa';
 import { getShodanHostInfo } from '../api/dnsApi';
 
 const DnsResults = ({ dnsData }) => {
@@ -7,6 +7,7 @@ const DnsResults = ({ dnsData }) => {
   const [shodanData, setShodanData] = useState(null);
   const [shodanLoading, setShodanLoading] = useState(false);
   const [shodanError, setShodanError] = useState(null);
+  const [shodanNote, setShodanNote] = useState(null);
   const [selectedIp, setSelectedIp] = useState(null);
   
   if (!dnsData) return null;
@@ -48,13 +49,31 @@ const DnsResults = ({ dnsData }) => {
     try {
       setShodanLoading(true);
       setShodanError(null);
+      setShodanNote(null);
       setSelectedIp(ip);
+      
       const data = await getShodanHostInfo(ip);
-      setShodanData(data);
+      setShodanData(data.info);
+      
+      // Check if there's a note about limited data
+      if (data.note) {
+        setShodanNote(data.note);
+      }
+      
       setShodanLoading(false);
     } catch (error) {
       console.error('Error fetching Shodan data:', error);
-      setShodanError(error.message || 'Failed to retrieve Shodan data');
+      
+      // Extract the error message
+      let errorMessage = error.message || 'Failed to retrieve Shodan data';
+      if (error.response?.data?.error) {
+        errorMessage = error.response.data.error;
+        if (error.response.data.message) {
+          errorMessage += ` - ${error.response.data.message}`;
+        }
+      }
+      
+      setShodanError(errorMessage);
       setShodanLoading(false);
     }
   };
@@ -64,7 +83,7 @@ const DnsResults = ({ dnsData }) => {
   
   return (
     <div className="space-y-6">
-      {/* IP Addresses with geolocation */}
+      {/* IP Addresses */}
       <div className="bg-white p-5 rounded-lg shadow-md">
         <div className="flex items-center mb-3">
           <FaServer className="text-indigo-600 mr-2" />
@@ -81,117 +100,42 @@ const DnsResults = ({ dnsData }) => {
                   Type
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Location
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {dnsData.ipAddresses && dnsData.ipAddresses.map((ip, index) => {
-                // Find IP details if available
-                const ipDetail = dnsData.ipDetails?.find(detail => detail.ip === ip);
-                
-                return (
-                  <tr key={index}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {ip}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {ip.includes(':') ? 'IPv6' : 'IPv4'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {ipDetail?.info ? (
-                        <div>
-                          <FaMapMarkerAlt className="text-red-500 inline-block mr-1" />
-                          {ipDetail.info.city}, {ipDetail.info.region}, {ipDetail.info.country}
-                        </div>
-                      ) : (
-                        <span className="text-gray-400">No location data</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <div className="flex space-x-3">
-                        <button 
-                          onClick={() => copyToClipboard(ip)}
-                          className="text-indigo-600 hover:text-indigo-800"
-                          title="Copy IP"
-                        >
-                          {copiedText === ip ? 'Copied!' : <FaCopy />}
-                        </button>
-                        <button 
-                          onClick={() => fetchShodanData(ip)}
-                          className="text-indigo-600 hover:text-indigo-800"
-                          title="Lookup in Shodan"
-                        >
-                          <FaSearch />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
+              {dnsData.ipAddresses && dnsData.ipAddresses.map((ip, index) => (
+                <tr key={index}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    {ip}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {ip.includes(':') ? 'IPv6' : 'IPv4'}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <div className="flex space-x-3">
+                      <button 
+                        onClick={() => copyToClipboard(ip)}
+                        className="text-indigo-600 hover:text-indigo-800"
+                        title="Copy IP"
+                      >
+                        {copiedText === ip ? 'Copied!' : <FaCopy />}
+                      </button>
+                      <button 
+                        onClick={() => fetchShodanData(ip)}
+                        className="text-indigo-600 hover:text-indigo-800"
+                        title="Lookup in Shodan"
+                      >
+                        <FaSearch />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
-        
-        {/* IP Details Section - Show when an IP has IPInfo data */}
-        {dnsData.ipDetails && dnsData.ipDetails.some(detail => detail.info) && (
-          <div className="mt-6 bg-gray-50 p-4 rounded-md">
-            <h4 className="text-md font-semibold text-gray-700 mb-3">
-              <FaGlobe className="inline-block mr-2 text-indigo-600" />
-              IP Information (via IPInfo.io)
-            </h4>
-            
-            {dnsData.ipDetails
-              .filter(detail => detail.info)
-              .map((detail, index) => (
-                <div key={index} className="mb-4 last:mb-0 border-b pb-4 last:border-b-0">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-sm font-medium">
-                        <FaNetworkWired className="inline-block mr-1 text-indigo-500" /> 
-                        {detail.ip} {detail.info.hostname && `(${detail.info.hostname})`}
-                      </p>
-                      <p className="text-sm mt-2">
-                        <FaMapMarkerAlt className="inline-block mr-1 text-red-500" /> 
-                        {detail.info.city}, {detail.info.region}, {detail.info.country} ({detail.info.loc})
-                      </p>
-                      {detail.info.postal && (
-                        <p className="text-sm text-gray-600 mt-1">Postal: {detail.info.postal}</p>
-                      )}
-                      {detail.info.timezone && (
-                        <p className="text-sm text-gray-600 mt-1">Timezone: {detail.info.timezone}</p>
-                      )}
-                    </div>
-                    <div>
-                      {detail.info.org && (
-                        <p className="text-sm">
-                          <FaBuilding className="inline-block mr-1 text-gray-500" /> 
-                          {detail.info.org}
-                        </p>
-                      )}
-                      {detail.info.asn && (
-                        <p className="text-sm mt-2">ASN: {detail.info.asn}</p>
-                      )}
-                      {detail.info.privacy && (
-                        <div className="mt-2 text-xs">
-                          <span className={`px-2 py-1 rounded ${
-                            detail.info.privacy === 'business' ? 'bg-blue-100 text-blue-800' :
-                            detail.info.privacy === 'hosting' ? 'bg-purple-100 text-purple-800' :
-                            'bg-green-100 text-green-800'
-                          }`}>
-                            {detail.info.privacy}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
-          </div>
-        )}
         
         {/* Shodan Data Section */}
         {shodanLoading && (
@@ -220,39 +164,51 @@ const DnsResults = ({ dnsData }) => {
               Shodan Information for {selectedIp}
             </h4>
             
+            {shodanNote && (
+              <div className="mb-4 bg-blue-50 p-3 rounded border border-blue-100">
+                <div className="flex">
+                  <FaInfoCircle className="text-blue-500 mt-0.5 mr-2" />
+                  <p className="text-sm text-blue-700">{shodanNote}</p>
+                </div>
+              </div>
+            )}
+            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <h5 className="text-sm font-medium text-gray-700 mb-2">General Information</h5>
                 <div className="bg-white p-3 rounded shadow-sm">
-                  {shodanData.info?.country_name && (
+                  {shodanData.country_name && (
                     <p className="text-sm mb-1">
                       <FaGlobe className="inline-block mr-1 text-blue-500" /> 
-                      Location: {shodanData.info.city || 'Unknown'}, {shodanData.info.country_name}
+                      Location: {shodanData.city || 'Unknown'}, {shodanData.country_name}
                     </p>
                   )}
-                  {shodanData.info?.isp && (
-                    <p className="text-sm mb-1">ISP: {shodanData.info.isp}</p>
+                  {shodanData.isp && (
+                    <p className="text-sm mb-1">ISP: {shodanData.isp}</p>
                   )}
-                  {shodanData.info?.org && (
-                    <p className="text-sm mb-1">Organization: {shodanData.info.org}</p>
+                  {shodanData.org && (
+                    <p className="text-sm mb-1">Organization: {shodanData.org}</p>
                   )}
-                  {shodanData.info?.os && (
-                    <p className="text-sm mb-1">Operating System: {shodanData.info.os}</p>
+                  {shodanData.os && (
+                    <p className="text-sm mb-1">Operating System: {shodanData.os}</p>
                   )}
-                  {shodanData.info?.last_update && (
+                  {shodanData.last_update && (
                     <p className="text-sm text-gray-500">
-                      Last updated: {new Date(shodanData.info.last_update).toLocaleString()}
+                      Last updated: {new Date(shodanData.last_update).toLocaleString()}
                     </p>
+                  )}
+                  {!shodanData.country_name && !shodanData.isp && !shodanData.org && !shodanData.os && (
+                    <p className="text-sm text-gray-500">Limited information available</p>
                   )}
                 </div>
               </div>
               
               <div>
                 <h5 className="text-sm font-medium text-gray-700 mb-2">Open Ports & Services</h5>
-                {shodanData.info?.ports && shodanData.info.ports.length > 0 ? (
+                {shodanData.ports && shodanData.ports.length > 0 ? (
                   <div className="bg-white p-3 rounded shadow-sm">
                     <div className="flex flex-wrap gap-2">
-                      {shodanData.info.ports.map(port => (
+                      {shodanData.ports.map(port => (
                         <span key={port} className="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded">
                           {port}
                         </span>
@@ -260,18 +216,18 @@ const DnsResults = ({ dnsData }) => {
                     </div>
                   </div>
                 ) : (
-                  <p className="text-sm text-gray-500">No open ports detected</p>
+                  <p className="text-sm text-gray-500">No open ports detected or limited by free API</p>
                 )}
               </div>
             </div>
             
             {/* More Shodan data can be displayed here */}
-            {shodanData.info?.vulns && shodanData.info.vulns.length > 0 && (
+            {shodanData.vulns && shodanData.vulns.length > 0 && (
               <div className="mt-4">
                 <h5 className="text-sm font-medium text-gray-700 mb-2">Vulnerabilities</h5>
                 <div className="bg-red-50 p-3 rounded shadow-sm">
                   <div className="flex flex-wrap gap-2">
-                    {shodanData.info.vulns.map(vuln => (
+                    {shodanData.vulns.map(vuln => (
                       <span key={vuln} className="bg-red-100 text-red-800 text-xs px-2 py-1 rounded flex items-center">
                         <FaExclamationTriangle className="mr-1" /> {vuln}
                       </span>
@@ -447,27 +403,21 @@ const DnsResults = ({ dnsData }) => {
                       <td className="px-4 py-2 text-sm">{dnsData.whois.registrant.organization || 'N/A'}</td>
                     </tr>
                     <tr>
+                      <td className="px-4 py-2 text-sm font-medium text-gray-500">Name</td>
+                      <td className="px-4 py-2 text-sm">{dnsData.whois.registrant.name || 'N/A'}</td>
+                    </tr>
+                    <tr className="bg-gray-50">
+                      <td className="px-4 py-2 text-sm font-medium text-gray-500">Email</td>
+                      <td className="px-4 py-2 text-sm">{dnsData.whois.registrant.email || 'N/A'}</td>
+                    </tr>
+                    <tr>
                       <td className="px-4 py-2 text-sm font-medium text-gray-500">Country</td>
                       <td className="px-4 py-2 text-sm">{dnsData.whois.registrant.country || 'N/A'}</td>
                     </tr>
                   </tbody>
                 </table>
               ) : (
-                <p className="text-gray-500 italic">Registrant information not available</p>
-              )}
-              
-              {remainingDays && remainingDays < 30 && (
-                <div className="mt-4 p-3 bg-red-50 border border-red-100 rounded-md">
-                  <div className="flex items-start">
-                    <FaExclamationTriangle className="text-red-500 mr-2 mt-0.5" />
-                    <div>
-                      <p className="text-sm font-medium text-red-800">Domain Expiring Soon</p>
-                      <p className="text-xs text-red-700 mt-1">
-                        This domain is set to expire in {remainingDays} days. Consider renewing it soon.
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                <p className="text-gray-500 italic">No registrant information available</p>
               )}
             </div>
           </div>
