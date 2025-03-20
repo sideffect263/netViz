@@ -8,7 +8,7 @@ const Footer = () => {
         <div className="md:flex md:items-center md:justify-between">
           <div className="flex justify-center md:justify-start space-x-6">
             <a
-              href="https://github.com"
+              href="https://github.com/sideffect263/netViz"
               target="_blank"
               rel="noopener noreferrer"
               className="text-gray-400 hover:text-indigo-600 transition-colors duration-300"
@@ -18,7 +18,7 @@ const Footer = () => {
             </a>
            
             <a
-              href="https://linkedin.com"
+              href="https://www.linkedin.com/in/ariel-biton"
               target="_blank"
               rel="noopener noreferrer"
               className="text-gray-400 hover:text-indigo-600 transition-colors duration-300"
