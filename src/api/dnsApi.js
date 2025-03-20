@@ -101,4 +101,58 @@ export const getNetworkInfo = async (domain) => {
     console.error('Error fetching network info:', error);
     throw error;
   }
+};
+
+// New IPINFO API endpoints
+export const getIpInfo = async (ip) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/ipinfo/ip/${ip}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching IP info:', error);
+    throw error;
+  }
+};
+
+export const getAsnInfo = async (asn) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/ipinfo/asn/${asn}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching ASN info:', error);
+    throw error;
+  }
+};
+
+// New SHODAN API endpoints
+export const getShodanHostInfo = async (ip) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/shodan/host/${ip}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching Shodan host info:', error);
+    throw error;
+  }
+};
+
+export const getShodanDomainInfo = async (domain) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/shodan/domain/${domain}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching Shodan domain info:', error);
+    throw error;
+  }
+};
+
+export const searchShodan = async (query) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/shodan/search`, {
+      params: { query }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error searching Shodan:', error);
+    throw error;
+  }
 }; 
