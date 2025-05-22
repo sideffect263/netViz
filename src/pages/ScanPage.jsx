@@ -67,7 +67,10 @@ const ScanPage = () => {
       navigate(`/results/${cleanDomain}`);
     } catch (err) {
       console.error('Scanning error:', err);
-      if (err.response) {
+      if (err.isRateLimit) {
+        // Special handling for rate limit errors
+        setError('Rate limit exceeded. Please wait a few minutes before trying again.');
+      } else if (err.response) {
         // If we got a server response with an error
         setError(`Error: ${err.response.data?.error || 'Server error'}`);
       } else if (err.request) {

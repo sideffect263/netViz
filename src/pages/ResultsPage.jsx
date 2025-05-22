@@ -512,7 +512,7 @@ const ResultsPage = () => {
                       </div>
                       
                       <div className="space-y-2">
-                        {Object.entries(data.security.headers.score.details).map(([header, status]) => (
+                        {data.security.headers.score.details && Object.entries(data.security.headers.score.details).map(([header, status]) => (
                           <div key={header} className="flex items-center justify-between">
                             <p className="text-sm text-gray-600">{header}</p>
                             <span className={`px-2 py-1 text-xs font-medium rounded ${

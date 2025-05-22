@@ -14,15 +14,20 @@ export default defineConfig({
       }
     }
   },
+  optimizeDeps: {
+    include: ['three', '3d-force-graph', 'three-spritetext'],
+    esbuildOptions: {
+      target: 'es2020'
+    }
+  },
   build: {
+    target: 'es2020',
     outDir: 'dist',
     rollupOptions: {
       output: {
-        assetFileNames: (assetInfo) => {
-          if (assetInfo.name.endsWith('.css')) {
-            return 'assets/[name]-[hash][extname]';
-          }
-          return 'assets/[name]-[hash][extname]';
+        manualChunks: {
+          three: ['three'],
+          'force-graph': ['3d-force-graph', 'three-spritetext']
         }
       }
     }

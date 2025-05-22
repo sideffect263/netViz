@@ -6,6 +6,9 @@ import HomePage from './pages/HomePage';
 import ScanPage from './pages/ScanPage';
 import ResultsPage from './pages/ResultsPage';
 import AboutPage from './pages/AboutPage';
+import AdminPage from './pages/AdminPage';
+import AutoHackerPage from './pages/AutoHackerPage';
+import AutoHackerInfoPage from './pages/AutoHackerInfoPage';
 import './App.css';
 
 function App() {
@@ -19,6 +22,9 @@ function App() {
             <Route path="/scan" element={<ScanPage />} />
             <Route path="/results/:domain" element={<ResultsPage />} />
             <Route path="/about" element={<AboutPage />} />
+            <Route path="/admin" element={<AdminPage />} />
+            <Route path="/auto-hacker" element={<AutoHackerPage />} />
+            <Route path="/auto-hacker-info" element={<AutoHackerInfoPage />} />
           </Routes>
         </main>
         <Footer />

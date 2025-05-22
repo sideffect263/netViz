@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
-import { FaServer, FaExclamationTriangle, FaInfoCircle, FaCopy, FaGlobe, FaSearch } from 'react-icons/fa';
-import { getShodanHostInfo } from '../api/dnsApi';
+import { FaServer, FaExclamationTriangle, FaInfoCircle, FaCopy, FaGlobe, FaSearch, FaNetworkWired, FaCube } from 'react-icons/fa';
+import { getShodanHostInfo, getDnsInfo } from '../api/dnsApi';
+import CacheIndicator from './CacheIndicator';
+import DnsHierarchy from './DnsHierarchy';
+import Dns3DVisualizationWrapper from './Dns3DVisualizationWrapper';
 
 const DnsResults = ({ dnsData }) => {
   const [copiedText, setCopiedText] = useState('');
@@ -9,6 +12,8 @@ const DnsResults = ({ dnsData }) => {
   const [shodanError, setShodanError] = useState(null);
   const [shodanNote, setShodanNote] = useState(null);
   const [selectedIp, setSelectedIp] = useState(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const [visualizationType, setVisualizationType] = useState('2d'); // '2d' or '3d'
   
   if (!dnsData) return null;
   
@@ -78,11 +83,76 @@ const DnsResults = ({ dnsData }) => {
     }
   };
   
+  // Function to refresh DNS data
+  const handleRefreshDnsData = async () => {
+    try {
+      if (refreshing || !dnsData.domain) return;
+      
+      setRefreshing(true);
+      
+      // Force a fresh fetch by adding a cache-busting parameter
+      const freshData = await getDnsInfo(dnsData.domain);
+      
+      // Reload the page to show new data
+      window.location.reload();
+    } catch (error) {
+      console.error('Error refreshing DNS data:', error);
+      setRefreshing(false);
+    }
+  };
+  
   const remainingDays = dnsData.whois?.expirationDate ? 
     calculateRemainingDays(dnsData.whois.expirationDate) : null;
   
   return (
     <div className="space-y-6">
+      {/* Cache Status Indicator */}
+      {dnsData._cache && (
+        <div className="flex justify-end">
+          <CacheIndicator 
+            cacheInfo={dnsData._cache} 
+            onRefresh={handleRefreshDnsData} 
+            label="DNS Data"
+          />
+        </div>
+      )}
+      
+      {/* Visualization Selection */}
+      <div className="bg-white p-4 rounded-lg shadow-md mb-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold text-gray-800">DNS Visualization</h3>
+          <div className="flex space-x-2">
+            <button
+              className={`px-3 py-1.5 rounded text-sm flex items-center ${
+                visualizationType === '2d' 
+                  ? 'bg-indigo-600 text-white' 
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+              onClick={() => setVisualizationType('2d')}
+            >
+              <FaNetworkWired className="mr-1" /> 2D View
+            </button>
+            <button
+              className={`px-3 py-1.5 rounded text-sm flex items-center ${
+                visualizationType === '3d' 
+                  ? 'bg-indigo-600 text-white' 
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+              onClick={() => setVisualizationType('3d')}
+            >
+              <FaCube className="mr-1" /> 3D View
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      {/* DNS Hierarchy Visualization */}
+      {visualizationType === '2d' ? (
+        <DnsHierarchy dnsData={dnsData} />
+      ) : (
+        <Dns3DVisualizationWrapper dnsData={dnsData} />
+      )}
+      
       {/* IP Addresses */}
       <div className="bg-white p-5 rounded-lg shadow-md">
         <div className="flex items-center mb-3">
@@ -384,9 +454,11 @@ const DnsResults = ({ dnsData }) => {
                   <tr>
                     <td className="px-4 py-2 text-sm font-medium text-gray-500">Status</td>
                     <td className="px-4 py-2 text-sm">
-                      {dnsData.whois.status && dnsData.whois.status.length > 0 
+                      {dnsData.whois.status && Array.isArray(dnsData.whois.status) && dnsData.whois.status.length > 0 
                         ? dnsData.whois.status.join(', ') 
-                        : 'N/A'}
+                        : typeof dnsData.whois.status === 'string'
+                          ? dnsData.whois.status
+                          : 'N/A'}
                     </td>
                   </tr>
                 </tbody>
