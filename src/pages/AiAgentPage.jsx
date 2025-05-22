@@ -2,7 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { FaRobot, FaTerminal, FaLightbulb, FaSpinner, FaCode, FaExclamationTriangle, FaInfoCircle, FaCloudDownloadAlt, FaHistory, FaChevronUp, FaServer, FaNetworkWired, FaLock, FaLockOpen, FaDownload, FaSearch } from 'react-icons/fa';
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api';
+
+
+
+
+
+const API_URL = 'https://netviz-dashboard.ofektechnology.com/api';
 
 // Custom hook for WebSocket connection
 const useAgentWebSocket = (sessionId) => {
@@ -14,7 +19,7 @@ const useAgentWebSocket = (sessionId) => {
     if (!sessionId) return;
 
     // Create WebSocket connection
-    const ws = new WebSocket(`ws://localhost:5000`);
+const ws = new WebSocket(`wss://netviz-dashboard.ofektechnology.com`);
     wsRef.current = ws;
 
     ws.onopen = () => {
