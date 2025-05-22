@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { FaNetworkWired, FaBars, FaTimes, FaRobot, FaInfoCircle, FaBrain } from 'react-icons/fa';
+import { FaNetworkWired, FaBars, FaTimes, FaRobot, FaInfoCircle, FaBrain, FaBook } from 'react-icons/fa';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -36,15 +36,7 @@ const Navbar = () => {
               >
                 Scan
               </Link>
-              <Link
-                to="/auto-hacker"
-                className={`${isActive('/auto-hacker')} inline-flex items-center px-1 pt-1 border-b-2 ${
-                  location.pathname === '/auto-hacker' ? 'border-indigo-500' : 'border-transparent'
-                } text-sm font-medium`}
-              >
-                <FaRobot className="h-4 w-4 mr-1" />
-                Auto Hacker
-              </Link>
+          
               <Link
                 to="/ai-agent"
                 className={`${isActive('/ai-agent')} inline-flex items-center px-1 pt-1 border-b-2 ${
@@ -53,6 +45,15 @@ const Navbar = () => {
               >
                 <FaBrain className="h-4 w-4 mr-1" />
                 AI Agent
+              </Link>
+              <Link
+                to="/documentation"
+                className={`${isActive('/documentation')} inline-flex items-center px-1 pt-1 border-b-2 ${
+                  location.pathname === '/documentation' ? 'border-indigo-500' : 'border-transparent'
+                } text-sm font-medium`}
+              >
+                <FaBook className="h-4 w-4 mr-1" />
+                Documentation
               </Link>
               <Link
                 to="/auto-hacker-info"
@@ -110,16 +111,7 @@ const Navbar = () => {
           >
             Scan
           </Link>
-          <Link
-            to="/auto-hacker"
-            className={`${
-              location.pathname === '/auto-hacker' ? 'bg-indigo-50 border-indigo-500 text-indigo-700' : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800'
-            } flex items-center pl-3 pr-4 py-2 border-l-4 text-base font-medium`}
-            onClick={() => setIsMenuOpen(false)}
-          >
-            <FaRobot className="h-5 w-5 mr-2" />
-            Auto Hacker
-          </Link>
+        
           <Link
             to="/ai-agent"
             className={`${
@@ -129,6 +121,16 @@ const Navbar = () => {
           >
             <FaBrain className="h-5 w-5 mr-2" />
             AI Agent
+          </Link>
+          <Link
+            to="/documentation"
+            className={`${
+              location.pathname === '/documentation' ? 'bg-indigo-50 border-indigo-500 text-indigo-700' : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800'
+            } flex items-center pl-3 pr-4 py-2 border-l-4 text-base font-medium`}
+            onClick={() => setIsMenuOpen(false)}
+          >
+            <FaBook className="h-5 w-5 mr-2" />
+            Documentation
           </Link>
           <Link
             to="/auto-hacker-info"

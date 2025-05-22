@@ -7,9 +7,9 @@ import ScanPage from './pages/ScanPage';
 import ResultsPage from './pages/ResultsPage';
 import AboutPage from './pages/AboutPage';
 import AdminPage from './pages/AdminPage';
-import AutoHackerPage from './pages/AutoHackerPage';
 import AutoHackerInfoPage from './pages/AutoHackerInfoPage';
 import AiAgentPage from './pages/AiAgentPage';
+import DocumentationPage from './pages/DocumentationPage';
 import './App.css';
 
 function App() {
@@ -24,9 +24,9 @@ function App() {
             <Route path="/results/:domain" element={<ResultsPage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/admin" element={<AdminPage />} />
-            <Route path="/auto-hacker" element={<AutoHackerPage />} />
             <Route path="/auto-hacker-info" element={<AutoHackerInfoPage />} />
             <Route path="/ai-agent" element={<AiAgentPage />} />
+            <Route path="/documentation" element={<DocumentationPage />} />
           </Routes>
         </main>
         <Footer />

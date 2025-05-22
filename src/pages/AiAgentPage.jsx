@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FaRobot, FaTerminal, FaLightbulb, FaSpinner, FaCode, FaExclamationTriangle, FaInfoCircle, FaCloudDownloadAlt, FaHistory, FaChevronUp, FaServer, FaNetworkWired, FaLock, FaLockOpen, FaDownload, FaSearch, FaMoon, FaSun } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
+import { FaRobot, FaTerminal, FaLightbulb, FaSpinner, FaCode, FaExclamationTriangle, FaInfoCircle, FaCloudDownloadAlt, FaHistory, FaChevronUp, FaServer, FaNetworkWired, FaLock, FaLockOpen, FaDownload, FaSearch, FaMoon, FaSun, FaQuestion, FaBook } from 'react-icons/fa';
 import axios from 'axios';
+import HelpModal from '../components/HelpModal';
 
 const API_URL = process.env.NODE_ENV === 'development' 
   ? 'http://localhost:5000/api'
@@ -614,6 +616,33 @@ const ThemeToggle = ({ darkMode, toggleDarkMode }) => {
   );
 };
 
+// HelpTool component - displays common capability questions as buttons
+const HelpTool = ({ onSelect }) => {
+  const helpOptions = [
+    { text: "What can you do?", description: "Show general capabilities" },
+    { text: "What types of scans can you perform?", description: "List available scan types" },
+    { text: "How do I use the scanning features?", description: "Show command examples" }
+  ];
+  
+  return (
+    <div className="mt-4 mb-2">
+      <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">Common questions:</div>
+      <div className="flex flex-wrap gap-2">
+        {helpOptions.map((option, index) => (
+          <button
+            key={index}
+            onClick={() => onSelect(option.text)}
+            className="px-3 py-1 text-xs bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900 dark:hover:bg-indigo-800 text-indigo-700 dark:text-indigo-300 rounded-full transition-colors"
+            title={option.description}
+          >
+            {option.text}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 const AiAgentPage = () => {
   const [sessionId, setSessionId] = useState('');
   const [command, setCommand] = useState('');
@@ -628,6 +657,8 @@ const AiAgentPage = () => {
   const [scanProgress, setScanProgress] = useState(0);
   const [scanPhase, setScanPhase] = useState('');
   const [darkMode, setDarkMode] = useState(false);
+  const [showHelpModal, setShowHelpModal] = useState(false);
+  const [showHelpTool, setShowHelpTool] = useState(false);
   
   // Connect to WebSocket
   const { connected, events } = useAgentWebSocket(sessionId);
@@ -976,6 +1007,19 @@ const AiAgentPage = () => {
     setDarkMode(prev => !prev);
   };
 
+  // Handle selecting a help option
+  const handleHelpOptionSelect = (question) => {
+    setCommand(question);
+    // Optionally auto-submit the command
+    handleSubmit({ preventDefault: () => {} });
+    setShowHelpTool(false);
+  };
+  
+  // Show help tool when "Need help?" is clicked
+  const toggleHelpTool = () => {
+    setShowHelpTool(prev => !prev);
+  };
+
   return (
     <div className={`min-h-screen transition-colors duration-200 ${darkMode ? 'dark bg-gray-900' : 'bg-gray-100'}`}>
       <div className="container mx-auto px-4 py-8">
@@ -999,6 +1043,23 @@ const AiAgentPage = () => {
                   </span>
                 )}
               </div>
+              <Link
+                to="/documentation"
+                className={`p-2 rounded-full ${darkMode ? 'text-indigo-400 hover:bg-gray-800' : 'text-indigo-600 hover:bg-indigo-50'} focus:outline-none transition-colors flex items-center`}
+                aria-label="Documentation"
+                title="Full Documentation"
+              >
+                <FaBook className="mr-1" />
+                <span className="text-sm">Docs</span>
+              </Link>
+              <button
+                onClick={() => setShowHelpModal(true)}
+                className={`p-2 rounded-full ${darkMode ? 'text-indigo-400 hover:bg-gray-800' : 'text-indigo-600 hover:bg-indigo-50'} focus:outline-none transition-colors`}
+                aria-label="Help"
+                title="Help & Documentation"
+              >
+                <FaQuestion />
+              </button>
               <ThemeToggle darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
             </div>
           </div>
@@ -1073,7 +1134,7 @@ const AiAgentPage = () => {
                     className={`w-full py-3 px-4 ${darkMode 
                       ? 'bg-gray-700 hover:bg-gray-600 border-gray-600 text-gray-200' 
                       : 'bg-gray-50 hover:bg-indigo-50 border-gray-200 text-gray-700'
-                    } border rounded-lg text-left transition-colors flex items-center`}
+                    } border rounded-lg text-left transition-colors`}
                   >
                     <span className="text-xl mr-2">{action.icon}</span>
                     <span className="text-sm font-medium">{action.name}</span>
@@ -1162,6 +1223,11 @@ const AiAgentPage = () => {
                   </div>
                 )}
                 
+                {/* Help Tool */}
+                {showHelpTool && (
+                  <HelpTool onSelect={handleHelpOptionSelect} />
+                )}
+                
                 <form onSubmit={handleSubmit} className="flex">
                   <CommandAutocomplete 
                     command={command}
@@ -1171,9 +1237,27 @@ const AiAgentPage = () => {
                   />
                 </form>
                 
-                <div className={`mt-2 text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'} flex items-center transition-colors`}>
-                  <FaSearch className={`${darkMode ? 'text-gray-500' : 'text-gray-400'} mr-1`} />
-                  <p>Try commands like: "scan example.com for open ports" or "run a quick scan on 8.8.8.8"</p>
+                <div className={`mt-2 text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'} flex items-center justify-between transition-colors`}>
+                  <div className="flex items-center">
+                    <FaSearch className={`${darkMode ? 'text-gray-500' : 'text-gray-400'} mr-1`} />
+                    <p>Try commands like: "scan example.com for open ports" or "run a quick scan on 8.8.8.8"</p>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={toggleHelpTool}
+                      className={`${darkMode ? 'text-indigo-400 hover:text-indigo-300' : 'text-indigo-600 hover:text-indigo-800'} text-xs underline transition-colors flex items-center`}
+                    >
+                      <FaQuestion className="mr-1" size={10} />
+                      Quick Help
+                    </button>
+                    <span className="text-gray-400">|</span>
+                    <button
+                      onClick={() => setShowHelpModal(true)}
+                      className={`${darkMode ? 'text-indigo-400 hover:text-indigo-300' : 'text-indigo-600 hover:text-indigo-800'} text-xs underline transition-colors`}
+                    >
+                      Documentation
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1277,6 +1361,9 @@ const AiAgentPage = () => {
           </div>
         </div>
       </div>
+      
+      {/* Help Modal */}
+      <HelpModal isOpen={showHelpModal} onClose={() => setShowHelpModal(false)} />
     </div>
   );
 };
