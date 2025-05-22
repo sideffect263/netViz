@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FaRobot, FaNetworkWired, FaBug, FaServer, FaPlayCircle } from 'react-icons/fa';
+import { FaRobot, FaTerminal, FaLightbulb, FaServer, FaPlayCircle, FaSearch, FaNetworkWired } from 'react-icons/fa';
 
 const AutoHackerInfoPage = () => {
   return (
@@ -11,14 +11,14 @@ const AutoHackerInfoPage = () => {
           <div className="w-full lg:w-1/2">
             <h1 className="text-4xl font-extrabold text-gray-900 mb-4 flex items-center">
               <FaRobot className="h-10 w-10 text-indigo-600 mr-3 animate-bounce" />
-              Autonomous Hacker Explained
+              AI Network Agent Explained
             </h1>
             <p className="text-lg text-gray-500 mb-6">
-              Dive into the mechanics behind NetScan360's <span className="font-semibold text-gray-700">Autonomous Hacker</span>
-              – an AI-powered reconnaissance engine that automatically uncovers vulnerabilities.
+              Dive into the mechanics behind NetViz's <span className="font-semibold text-gray-700">AI Network Agent</span>
+              – an intelligent assistant that helps you explore and understand your network.
             </p>
             <Link
-              to="/auto-hacker"
+              to="/ai-agent"
               className="inline-flex items-center bg-indigo-600 border border-transparent rounded-md py-3 px-6 text-base font-medium text-white hover:bg-indigo-700 shadow-lg transition-colors"
             >
               <FaPlayCircle className="mr-2" /> Try It Now
@@ -28,7 +28,7 @@ const AutoHackerInfoPage = () => {
           <div className="hidden lg:block lg:w-1/2">
             <div className="relative">
               <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full blur-lg opacity-70 animate-ping"></div>
-              <FaServer className="relative h-64 w-64 text-indigo-600 mx-auto" />
+              <FaRobot className="relative h-64 w-64 text-indigo-600 mx-auto" />
             </div>
           </div>
         </div>
@@ -36,123 +36,129 @@ const AutoHackerInfoPage = () => {
 
       {/* How it Works */}
       <div className="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
-        <h2 className="text-3xl font-extrabold text-gray-900 mb-12 text-center">How the First Two Stages Operate</h2>
+        <h2 className="text-3xl font-extrabold text-gray-900 mb-12 text-center">How the AI Agent Works</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-          {/* Port Scan Card */}
+          {/* Chat Interface Card */}
           <div className="bg-gray-50 p-8 rounded-lg shadow-sm hover:shadow-lg transition-shadow">
             <div className="flex items-center mb-4">
-              <FaNetworkWired className="h-8 w-8 text-indigo-500 mr-3 animate-spin-slow" />
-              <h3 className="text-2xl font-semibold text-gray-900">Stage 1: Port Scan</h3>
+              <FaTerminal className="h-8 w-8 text-indigo-500 mr-3 animate-spin-slow" />
+              <h3 className="text-2xl font-semibold text-gray-900">Intelligent Chat Interface</h3>
             </div>
             <p className="text-gray-600 mb-3">
-              The Autonomous Hacker kicks off with a lightning-fast <span className="font-medium">port scan</span> driven by our
-              <span className="font-medium"> MCP Nmap server</span>.
+              The AI Network Agent provides a <span className="font-medium">natural language interface</span> where you can ask questions and request network scans.
             </p>
             <ul className="list-disc ml-6 text-gray-500 space-y-2">
-              <li>Scans <span className="font-semibold">up to 65,535</span> TCP/UDP ports depending on the chosen depth.</li>
-              <li>Uses <code className="bg-gray-200 px-1 rounded text-xs">nmapScan</code> tool exposed by the MCP server.</li>
-              <li>Tailored flag set (e.g. <code className="bg-gray-200 px-1 rounded text-xs">-T4 -p 1-1000</code>) is sent as JSON over HTTP.</li>
-              <li>Results stream back in real-time, parsed into structured JSON.</li>
+              <li>Type commands like <code className="bg-gray-200 px-1 rounded text-xs">"scan example.com"</code> in plain English.</li>
+              <li>Get suggestions for common commands with autocomplete.</li>
+              <li>The agent interprets your request and executes the appropriate action.</li>
+              <li>Results are presented in a clear, visual format.</li>
             </ul>
           </div>
 
-          {/* Vulnerability Scan Card */}
+          {/* Thinking Process Card */}
           <div className="bg-gray-50 p-8 rounded-lg shadow-sm hover:shadow-lg transition-shadow">
             <div className="flex items-center mb-4">
-              <FaBug className="h-8 w-8 text-red-500 mr-3 animate-pulse" />
-              <h3 className="text-2xl font-semibold text-gray-900">Stage 2: Vulnerability Scan</h3>
+              <FaLightbulb className="h-8 w-8 text-yellow-500 mr-3 animate-pulse" />
+              <h3 className="text-2xl font-semibold text-gray-900">Transparent Thinking Process</h3>
             </div>
             <p className="text-gray-600 mb-3">
-              Next, we trigger an <span className="font-medium">Nmap script-based vulnerability scan</span> through the same MCP endpoint.
+              Watch the agent's <span className="font-medium">thought process in real-time</span> as it works on your request.
             </p>
             <ul className="list-disc ml-6 text-gray-500 space-y-2">
-              <li>Executes <code className="bg-gray-200 px-1 rounded text-xs">--script vuln</code> across discovered services.</li>
-              <li>MCP server returns both the human-readable summary <em>and</em> the full XML output.</li>
-              <li>Our backend parses script results, extracting CVE references &amp; severity.</li>
-              <li>The AI layer (Anthropic) then ranks and contextualises each finding.</li>
+              <li>See the agent's reasoning and decision-making steps.</li>
+              <li>Monitor tool usage and actions as they happen.</li>
+              <li>Track progress updates during longer tasks like network scans.</li>
+              <li>Learn how the agent interprets and responds to your commands.</li>
             </ul>
           </div>
         </div>
 
-        {/* MCP Flow Section */}
+        {/* Real-time WebSocket Section */}
         <div className="mt-20 bg-indigo-50 rounded-lg p-10">
-          <h3 className="text-2xl font-bold text-indigo-700 mb-4 text-center">Behind the Scenes – MCP Nmap Server Flow</h3>
+          <h3 className="text-2xl font-bold text-indigo-700 mb-4 text-center">Behind the Scenes – Real-time Communication</h3>
           <ol className="space-y-4 text-gray-700 list-decimal ml-6">
             <li>
-              <span className="font-medium">React UI</span> sends your target &amp; selected depth to our Express API.
+              <span className="font-medium">React UI</span> establishes a WebSocket connection for real-time updates.
             </li>
             <li>
-              The server calls <code className="bg-gray-200 px-1 rounded text-xs">invokeNmapScan</code> which lazily initialises the
-              MCP client and selects the <code className="bg-gray-200 px-1 rounded text-xs">nmapScan</code> tool.
+              When you submit a command, it's sent to the backend API via a POST request.
             </li>
             <li>
-              Flags are transmitted over a secure, streaming HTTP transport to
-              <span className="font-semibold"> server.smithery.ai</span>.
+              The backend processes your request and sends events about the agent's actions through the WebSocket.
             </li>
             <li>
-              The MCP server executes Nmap in an isolated sandbox and streams results back chunk-by-chunk – no CLI or browser extensions needed.
+              Different event types (tool usage, thinking steps, progress updates) are streamed back to the UI.
             </li>
             <li>
-              Our backend parses &amp; stores the data, updates progress every 2 seconds, and the UI renders live insights.
+              Results are visualized in real-time, with scan data presented in an interactive format.
             </li>
           </ol>
         </div>
 
-        {/* Architecture Section */}
+        {/* Network Scanning Section */}
         <div className="mt-20">
-          <h2 className="text-3xl font-extrabold text-gray-900 mb-8 text-center">Building the Custom MCP Nmap Server</h2>
+          <h2 className="text-3xl font-extrabold text-gray-900 mb-8 text-center">Powerful Network Scanning Capabilities</h2>
           <div className="bg-white shadow-md rounded-lg p-10 space-y-6">
             <p className="text-gray-600 text-lg leading-relaxed">
-              To avoid shipping a heavy Nmap binary with our Node.js backend, we created a <span className="font-semibold">dedicated Model-Context-Protocol (MCP) server</span> that exposes
-              sandboxed Nmap scans as remote <code className="bg-gray-200 px-1 rounded text-sm">tools</code>. Below is a distilled journey of how it was built and woven into NetScan360.
+              The AI Agent can perform various network scans and interpret the results for you. It uses natural language understanding to configure and execute scans based on your requests.
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-4">
                 <h3 className="text-xl font-semibold text-indigo-700 flex items-center">
-                  <FaServer className="mr-2" /> Core Steps
+                  <FaNetworkWired className="mr-2" /> Scan Types
                 </h3>
                 <ul className="list-decimal ml-6 space-y-2 text-gray-700">
                   <li>
-                    Provisioned a lightweight Ubuntu container on <span className="font-medium">Fly.io</span> with only Nmap &amp; Lua scripts installed.
+                    <span className="font-medium">Quick scans</span> for rapid reconnaissance of targets.
                   </li>
                   <li>
-                    Implemented a tiny <code className="bg-gray-200 px-1 rounded text-sm">toolServer.ts</code> that wraps Nmap execution behind a <em>streamable</em> HTTP interface defined by MCP.
+                    <span className="font-medium">Service detection</span> to identify what's running on open ports.
                   </li>
                   <li>
-                    Registered two tools – <code className="bg-gray-200 px-1 rounded text-sm">nmapScan</code> &amp; <code className="bg-gray-200 px-1 rounded text-sm">getInfo</code> – each with a JSON schema for parameters &amp; results.
+                    <span className="font-medium">Comprehensive port scans</span> to check all possible ports on a target.
                   </li>
                   <li>
-                    Hardened the container with <span className="font-medium">seccomp</span> &amp; <span className="font-medium">cap-drop</span> to isolate potential shell-escape attempts.
+                    <span className="font-medium">Vulnerability checks</span> to identify potential security issues.
                   </li>
                   <li>
-                    Published the endpoint on Smithery (<code className="bg-gray-200 px-1 rounded text-sm">server.smithery.ai/@sideffect263/nmap-mcp-server</code>).
+                    <span className="font-medium">Custom scans</span> with specific parameters as needed.
                   </li>
                 </ul>
               </div>
 
               <div className="space-y-4">
                 <h3 className="text-xl font-semibold text-indigo-700 flex items-center">
-                  <FaRobot className="mr-2" /> Project Integration
+                  <FaSearch className="mr-2" /> Result Visualization
                 </h3>
                 <ul className="list-disc ml-6 space-y-2 text-gray-700">
-                  <li>Created <code className="bg-gray-200 px-1 rounded text-sm">mcpClientSideEffect.mjs</code> to initialise a client once and reuse it for all scans.</li>
-                  <li>Added intelligent reconnection &amp; <em>tool discovery</em> logic to survive server restarts.</li>
-                  <li>Wrapped invocation in <code className="bg-gray-200 px-1 rounded text-sm">invokeNmapScan()</code>, converting <code className="text-xs">nmap_args array → flags string</code>.</li>
-                  <li>All backend stages call this helper; the UI receives parsed JSON plus live progress via REST polling.</li>
+                  <li>Scan results presented in an organized, tabular format.</li>
+                  <li>Summary view with counts of open ports, services, and hosts.</li>
+                  <li>Detailed view showing individual port states and services.</li>
+                  <li>Raw data access for technical users who need the complete information.</li>
+                  <li>Visual indicators to highlight important findings like open ports.</li>
                 </ul>
               </div>
             </div>
 
-            {/* simplified sequence diagram */}
+            {/* Example command flow */}
             <div className="mt-10">
-              <h4 className="text-lg font-semibold text-gray-900 mb-3 text-center">Sequence Diagram (simplified)</h4>
+              <h4 className="text-lg font-semibold text-gray-900 mb-3 text-center">Example Interaction</h4>
               <pre className="bg-gray-900 text-green-400 text-sm rounded-lg p-6 overflow-x-auto">
-{`browser        →  Express API       →  MCP Client     →  MCP Server
-/auto-hacker      POST /scan            invokeNmapScan     run nmap -T4 …
-                ← 200 (scanId)      ←  progress JSON   ←  XML & summary
-progress bar  ←  GET /status/:id  ←  cached results  ←  streamed chunks`}
+{`User: "scan example.com for open ports"
+
+AI Agent: Processing your request...
+[Thinking Process: Determining scan type, configuring parameters]
+[Tool Usage: Executing port scan against example.com]
+[Progress: 20% - Discovering hosts...]
+[Progress: 40% - Port scanning...]
+[Progress: 70% - Service detection...]
+[Progress: 100% - Scan complete!]
+
+AI Agent: I've completed the scan of example.com. 
+Found 3 open ports: 80 (http), 443 (https), 22 (ssh).
+[Displays interactive visualization of scan results]`}
               </pre>
             </div>
           </div>
@@ -160,12 +166,12 @@ progress bar  ←  GET /status/:id  ←  cached results  ←  streamed chunks`}
 
         {/* Closing CTA */}
         <div className="mt-20 text-center">
-          <p className="text-gray-700 text-lg mb-6">Curious to see it in action? Launch the Autonomous Hacker and watch the magic unfold.</p>
+          <p className="text-gray-700 text-lg mb-6">Ready to explore your network with AI assistance? Try the AI Network Agent now!</p>
           <Link
-            to="/auto-hacker"
+            to="/ai-agent"
             className="inline-flex items-center bg-indigo-600 border border-transparent rounded-md py-3 px-6 text-base font-medium text-white hover:bg-indigo-700 shadow-lg transition-colors"
           >
-            <FaPlayCircle className="mr-2" /> Start a Scan
+            <FaPlayCircle className="mr-2" /> Chat with the Agent
           </Link>
         </div>
       </div>
