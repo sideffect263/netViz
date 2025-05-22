@@ -1251,12 +1251,12 @@ const AiAgentPage = () => {
                       Quick Help
                     </button>
                     <span className="text-gray-400">|</span>
-                    <button
-                      onClick={() => setShowHelpModal(true)}
+                    <Link
+                      to="/documentation"
                       className={`${darkMode ? 'text-indigo-400 hover:text-indigo-300' : 'text-indigo-600 hover:text-indigo-800'} text-xs underline transition-colors`}
                     >
                       Documentation
-                    </button>
+                    </Link>
                   </div>
                 </div>
               </div>
