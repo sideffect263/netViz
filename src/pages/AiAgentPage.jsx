@@ -1,13 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FaRobot, FaTerminal, FaLightbulb, FaSpinner, FaCode, FaExclamationTriangle, FaInfoCircle, FaCloudDownloadAlt, FaHistory, FaChevronUp, FaServer, FaNetworkWired, FaLock, FaLockOpen, FaDownload, FaSearch } from 'react-icons/fa';
+import { FaRobot, FaTerminal, FaLightbulb, FaSpinner, FaCode, FaExclamationTriangle, FaInfoCircle, FaCloudDownloadAlt, FaHistory, FaChevronUp, FaServer, FaNetworkWired, FaLock, FaLockOpen, FaDownload, FaSearch, FaMoon, FaSun } from 'react-icons/fa';
 import axios from 'axios';
 
-
-
-
-
-
-const API_URL = 'https://netviz-dashboard.ofektechnology.com/api';
+const API_URL = process.env.NODE_ENV === 'development' 
+  ? 'http://localhost:5000/api'
+  : 'https://netviz-dashboard.ofektechnology.com/api';
 
 // Custom hook for WebSocket connection
 const useAgentWebSocket = (sessionId) => {
@@ -19,7 +16,10 @@ const useAgentWebSocket = (sessionId) => {
     if (!sessionId) return;
 
     // Create WebSocket connection
-const ws = new WebSocket(`wss://netviz-dashboard.ofektechnology.com`);
+    const wsURL = process.env.NODE_ENV === 'development' 
+      ? 'ws://localhost:5000'
+      : 'wss://netviz-dashboard.ofektechnology.com';
+    const ws = new WebSocket(wsURL);
     wsRef.current = ws;
 
     ws.onopen = () => {
@@ -70,8 +70,49 @@ const ws = new WebSocket(`wss://netviz-dashboard.ofektechnology.com`);
   return { connected, events };
 };
 
-// Basic result visualization component
-const ScanResultVisualizer = ({ result }) => {
+// Collapsible event group component for thinking pane
+const ThinkingEventGroup = ({ title, events, icon, renderEventContent, darkMode }) => {
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  
+  return (
+    <div className={`mb-4 border ${darkMode ? 'border-gray-700' : 'border-gray-200'} rounded-lg overflow-hidden transition-colors`}>
+      <button
+        onClick={() => setIsCollapsed(!isCollapsed)}
+        className={`w-full flex items-center justify-between ${darkMode ? 'bg-gray-800 hover:bg-gray-700' : 'bg-gray-50 hover:bg-gray-100'} px-4 py-2 text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'} transition-colors`}
+      >
+        <div className="flex items-center">
+          {icon}
+          <span className="ml-2">{title}</span>
+          <span className={`ml-2 ${darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-200 text-gray-700'} px-2 py-0.5 text-xs rounded-full transition-colors`}>
+            {events.length}
+          </span>
+        </div>
+        <svg
+          className={`w-5 h-5 ${darkMode ? 'text-gray-400' : 'text-gray-500'} transform transition-transform ${isCollapsed ? 'rotate-180' : ''}`}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+        </svg>
+      </button>
+      
+      {!isCollapsed && (
+        <div className={`p-4 ${darkMode ? 'bg-gray-800' : 'bg-white'} space-y-3 transition-colors`}>
+          {events.map((event, idx) => (
+            <div key={idx} className={`pb-3 border-b ${darkMode ? 'border-gray-700' : 'border-gray-100'} last:border-0 last:pb-0 transition-colors`}>
+              {renderEventContent(event, darkMode)}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Update ScanResultVisualizer to support dark mode
+const ScanResultVisualizer = ({ result, darkMode }) => {
   const [visualData, setVisualData] = useState(null);
   const [activeTab, setActiveTab] = useState('summary');
   
@@ -172,9 +213,9 @@ const ScanResultVisualizer = ({ result }) => {
   // For raw text results
   if (visualData.type === 'text') {
     return (
-      <div className="mt-4 bg-white p-4 rounded-lg shadow border border-gray-200">
-        <h3 className="text-lg font-medium text-gray-800 mb-2">Scan Results</h3>
-        <pre className="bg-gray-50 p-3 rounded text-sm overflow-x-auto whitespace-pre-wrap">
+      <div className={`mt-4 ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} p-4 rounded-lg shadow border transition-colors`}>
+        <h3 className={`text-lg font-medium ${darkMode ? 'text-gray-200' : 'text-gray-800'} mb-2 transition-colors`}>Scan Results</h3>
+        <pre className={`${darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-50 text-gray-800'} p-3 rounded text-sm overflow-x-auto whitespace-pre-wrap transition-colors`}>
           {visualData.data}
         </pre>
       </div>
@@ -183,24 +224,48 @@ const ScanResultVisualizer = ({ result }) => {
   
   // For scan results that we can visualize
   return (
-    <div className="mt-4 bg-white rounded-lg shadow border border-gray-200 overflow-hidden">
-      <div className="border-b border-gray-200">
+    <div className={`mt-4 ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg shadow border overflow-hidden transition-colors`}>
+      <div className={`border-b ${darkMode ? 'border-gray-700' : 'border-gray-200'} transition-colors`}>
         <div className="flex">
           <button 
             onClick={() => setActiveTab('summary')}
-            className={`px-4 py-2 text-sm font-medium ${activeTab === 'summary' ? 'bg-indigo-50 text-indigo-700 border-b-2 border-indigo-500' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'}`}
+            className={`px-4 py-2 text-sm font-medium transition-colors ${
+              activeTab === 'summary' 
+                ? (darkMode 
+                  ? 'bg-indigo-900 text-indigo-300 border-b-2 border-indigo-500' 
+                  : 'bg-indigo-50 text-indigo-700 border-b-2 border-indigo-500')
+                : (darkMode
+                  ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-700' 
+                  : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50')
+            }`}
           >
             Summary
           </button>
           <button
             onClick={() => setActiveTab('details')}
-            className={`px-4 py-2 text-sm font-medium ${activeTab === 'details' ? 'bg-indigo-50 text-indigo-700 border-b-2 border-indigo-500' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'}`}
+            className={`px-4 py-2 text-sm font-medium transition-colors ${
+              activeTab === 'details' 
+                ? (darkMode 
+                  ? 'bg-indigo-900 text-indigo-300 border-b-2 border-indigo-500' 
+                  : 'bg-indigo-50 text-indigo-700 border-b-2 border-indigo-500')
+                : (darkMode
+                  ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-700' 
+                  : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50')
+            }`}
           >
             Details
           </button>
           <button
             onClick={() => setActiveTab('raw')}
-            className={`px-4 py-2 text-sm font-medium ${activeTab === 'raw' ? 'bg-indigo-50 text-indigo-700 border-b-2 border-indigo-500' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'}`}
+            className={`px-4 py-2 text-sm font-medium transition-colors ${
+              activeTab === 'raw' 
+                ? (darkMode 
+                  ? 'bg-indigo-900 text-indigo-300 border-b-2 border-indigo-500' 
+                  : 'bg-indigo-50 text-indigo-700 border-b-2 border-indigo-500')
+                : (darkMode
+                  ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-700' 
+                  : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50')
+            }`}
           >
             Raw Data
           </button>
@@ -210,45 +275,45 @@ const ScanResultVisualizer = ({ result }) => {
       <div className="p-4">
         {activeTab === 'summary' && (
           <div>
-            <h3 className="text-lg font-medium text-gray-800 mb-4">Scan Summary</h3>
+            <h3 className={`text-lg font-medium ${darkMode ? 'text-gray-200' : 'text-gray-800'} mb-4 transition-colors`}>Scan Summary</h3>
             
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
-              <div className="bg-blue-50 p-3 rounded-lg border border-blue-100">
+              <div className={`${darkMode ? 'bg-blue-900' : 'bg-blue-50'} p-3 rounded-lg border ${darkMode ? 'border-blue-800' : 'border-blue-100'} transition-colors`}>
                 <div className="flex items-center">
-                  <FaNetworkWired className="text-blue-500 mr-2" />
-                  <span className="text-sm font-medium text-gray-600">Hosts</span>
+                  <FaNetworkWired className={`${darkMode ? 'text-blue-400' : 'text-blue-500'} mr-2 transition-colors`} />
+                  <span className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'} transition-colors`}>Hosts</span>
                 </div>
-                <p className="text-2xl font-bold text-blue-700 mt-1">
+                <p className={`text-2xl font-bold ${darkMode ? 'text-blue-300' : 'text-blue-700'} mt-1 transition-colors`}>
                   {visualData.summary.hosts || 1}
                 </p>
               </div>
               
-              <div className="bg-green-50 p-3 rounded-lg border border-green-100">
+              <div className={`${darkMode ? 'bg-green-900' : 'bg-green-50'} p-3 rounded-lg border ${darkMode ? 'border-green-800' : 'border-green-100'} transition-colors`}>
                 <div className="flex items-center">
-                  <FaLockOpen className="text-green-500 mr-2" />
-                  <span className="text-sm font-medium text-gray-600">Open Ports</span>
+                  <FaLockOpen className={`${darkMode ? 'text-green-400' : 'text-green-500'} mr-2 transition-colors`} />
+                  <span className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'} transition-colors`}>Open Ports</span>
                 </div>
-                <p className="text-2xl font-bold text-green-700 mt-1">
+                <p className={`text-2xl font-bold ${darkMode ? 'text-green-300' : 'text-green-700'} mt-1 transition-colors`}>
                   {visualData.summary.openPorts || 0}
                 </p>
               </div>
               
-              <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
+              <div className={`${darkMode ? 'bg-gray-800' : 'bg-gray-50'} p-3 rounded-lg border ${darkMode ? 'border-gray-700' : 'border-gray-200'} transition-colors`}>
                 <div className="flex items-center">
-                  <FaLock className="text-gray-500 mr-2" />
-                  <span className="text-sm font-medium text-gray-600">Closed Ports</span>
+                  <FaLock className={`${darkMode ? 'text-gray-400' : 'text-gray-500'} mr-2 transition-colors`} />
+                  <span className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'} transition-colors`}>Closed Ports</span>
                 </div>
-                <p className="text-2xl font-bold text-gray-700 mt-1">
+                <p className={`text-2xl font-bold ${darkMode ? 'text-gray-300' : 'text-gray-700'} mt-1 transition-colors`}>
                   {visualData.summary.closedPorts || 0}
                 </p>
               </div>
               
-              <div className="bg-purple-50 p-3 rounded-lg border border-purple-100">
+              <div className={`${darkMode ? 'bg-purple-900' : 'bg-purple-50'} p-3 rounded-lg border ${darkMode ? 'border-purple-800' : 'border-purple-100'} transition-colors`}>
                 <div className="flex items-center">
-                  <FaServer className="text-purple-500 mr-2" />
-                  <span className="text-sm font-medium text-gray-600">Services</span>
+                  <FaServer className={`${darkMode ? 'text-purple-400' : 'text-purple-500'} mr-2 transition-colors`} />
+                  <span className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'} transition-colors`}>Services</span>
                 </div>
-                <p className="text-2xl font-bold text-purple-700 mt-1">
+                <p className={`text-2xl font-bold ${darkMode ? 'text-purple-300' : 'text-purple-700'} mt-1 transition-colors`}>
                   {visualData.summary.services?.length || 0}
                 </p>
               </div>
@@ -257,10 +322,10 @@ const ScanResultVisualizer = ({ result }) => {
             {/* Services List */}
             {visualData.summary.services && visualData.summary.services.length > 0 && (
               <div>
-                <h4 className="text-md font-medium text-gray-700 mb-2">Detected Services</h4>
+                <h4 className={`text-md font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'} mb-2 transition-colors`}>Detected Services</h4>
                 <div className="flex flex-wrap gap-2">
                   {visualData.summary.services.map((service, idx) => (
-                    <span key={idx} className="px-2 py-1 bg-indigo-100 text-indigo-800 text-xs rounded-full">
+                    <span key={idx} className={`px-2 py-1 ${darkMode ? 'bg-indigo-800 text-indigo-200' : 'bg-indigo-100 text-indigo-800'} text-xs rounded-full transition-colors`}>
                       {service}
                     </span>
                   ))}
@@ -269,7 +334,7 @@ const ScanResultVisualizer = ({ result }) => {
             )}
             
             <div className="mt-4 flex justify-end">
-              <button className="flex items-center text-sm text-indigo-600 hover:text-indigo-800">
+              <button className={`flex items-center text-sm ${darkMode ? 'text-indigo-400 hover:text-indigo-300' : 'text-indigo-600 hover:text-indigo-800'} transition-colors`}>
                 <FaDownload className="mr-1" />
                 Export Results
               </button>
@@ -279,46 +344,48 @@ const ScanResultVisualizer = ({ result }) => {
         
         {activeTab === 'details' && (
           <div>
-            <h3 className="text-lg font-medium text-gray-800 mb-4">Detailed Results</h3>
+            <h3 className={`text-lg font-medium ${darkMode ? 'text-gray-200' : 'text-gray-800'} mb-4 transition-colors`}>Detailed Results</h3>
             {/* Render a more detailed view of the scan results */}
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+              <table className={`min-w-full divide-y ${darkMode ? 'divide-gray-700' : 'divide-gray-200'} transition-colors`}>
+                <thead className={`${darkMode ? 'bg-gray-900' : 'bg-gray-50'} transition-colors`}>
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className={`px-6 py-3 text-left text-xs font-medium ${darkMode ? 'text-gray-400' : 'text-gray-500'} uppercase tracking-wider transition-colors`}>
                       Port
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className={`px-6 py-3 text-left text-xs font-medium ${darkMode ? 'text-gray-400' : 'text-gray-500'} uppercase tracking-wider transition-colors`}>
                       Protocol
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className={`px-6 py-3 text-left text-xs font-medium ${darkMode ? 'text-gray-400' : 'text-gray-500'} uppercase tracking-wider transition-colors`}>
                       State
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className={`px-6 py-3 text-left text-xs font-medium ${darkMode ? 'text-gray-400' : 'text-gray-500'} uppercase tracking-wider transition-colors`}>
                       Service
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className={`${darkMode ? 'bg-gray-800' : 'bg-white'} divide-y ${darkMode ? 'divide-gray-700' : 'divide-gray-200'} transition-colors`}>
                   {/* This is a simplified example - adapt to your actual data structure */}
                   {(visualData.data.ports || 
                     (visualData.data.hosts && visualData.data.hosts[0]?.ports) || 
                     []).map((port, idx) => (
-                    <tr key={idx} className={port.state === 'open' ? 'bg-green-50' : ''}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    <tr key={idx} className={port.state === 'open' ? (darkMode ? 'bg-green-900' : 'bg-green-50') : ''}>
+                      <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${darkMode ? 'text-gray-200' : 'text-gray-900'} transition-colors`}>
                         {port.portid || port.port || 'N/A'}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className={`px-6 py-4 whitespace-nowrap text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'} transition-colors`}>
                         {port.protocol || 'tcp'}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          port.state === 'open' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full transition-colors ${
+                          port.state === 'open' 
+                            ? (darkMode ? 'bg-green-800 text-green-200' : 'bg-green-100 text-green-800') 
+                            : (darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-800')
                         }`}>
                           {port.state || 'unknown'}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className={`px-6 py-4 whitespace-nowrap text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'} transition-colors`}>
                         {(port.service && port.service.name) || port.service || 'N/A'}
                       </td>
                     </tr>
@@ -331,8 +398,8 @@ const ScanResultVisualizer = ({ result }) => {
         
         {activeTab === 'raw' && (
           <div>
-            <h3 className="text-lg font-medium text-gray-800 mb-4">Raw Data</h3>
-            <pre className="bg-gray-50 p-3 rounded text-sm overflow-x-auto max-h-96 whitespace-pre-wrap">
+            <h3 className={`text-lg font-medium ${darkMode ? 'text-gray-200' : 'text-gray-800'} mb-4 transition-colors`}>Raw Data</h3>
+            <pre className={`${darkMode ? 'bg-gray-900 text-gray-300' : 'bg-gray-50 text-gray-800'} p-3 rounded text-sm overflow-x-auto max-h-96 whitespace-pre-wrap transition-colors`}>
               {JSON.stringify(visualData.data, null, 2)}
             </pre>
           </div>
@@ -343,7 +410,7 @@ const ScanResultVisualizer = ({ result }) => {
 };
 
 // Command autocomplete component
-const CommandAutocomplete = ({ command, setCommand, disabled }) => {
+const CommandAutocomplete = ({ command, setCommand, disabled, darkMode }) => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
   const inputRef = useRef(null);
@@ -496,14 +563,14 @@ const CommandAutocomplete = ({ command, setCommand, disabled }) => {
             }
           }}
           disabled={disabled}
-          className="flex-grow px-4 py-2 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className={`flex-grow px-4 py-2 border ${darkMode ? 'border-gray-700' : 'border-gray-300'} rounded-l-lg focus:outline-none focus:ring-2 focus:ring-indigo-500`}
           placeholder="Enter a command..."
           autoComplete="off"
         />
         <button
           type="submit"
           disabled={disabled || !command.trim()}
-          className="bg-indigo-600 text-white px-4 py-2 rounded-r-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-indigo-300"
+          className={`bg-indigo-600 text-white px-4 py-2 rounded-r-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-indigo-300 ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : ''}`}
         >
           Send
         </button>
@@ -515,13 +582,13 @@ const CommandAutocomplete = ({ command, setCommand, disabled }) => {
           {suggestions.map((suggestion, index) => (
             <button
               key={index}
-              className="suggestion-item w-full text-left px-4 py-2 hover:bg-indigo-50 focus:bg-indigo-50 focus:outline-none transition-colors flex items-center justify-between"
+              className={`suggestion-item w-full text-left px-4 py-2 hover:bg-indigo-50 focus:bg-indigo-50 focus:outline-none transition-colors flex items-center justify-between ${darkMode ? 'bg-gray-800 hover:bg-gray-700' : ''}`}
               onClick={() => handleSuggestionClick(suggestion)}
               onKeyDown={(e) => handleSuggestionKeyDown(e, index, suggestion)}
               tabIndex={0}
             >
-              <span className="text-gray-800 font-medium">{suggestion.text}</span>
-              <span className="text-xs text-gray-500">{suggestion.description}</span>
+              <span className={`text-${darkMode ? 'gray-200' : 'gray-800'} font-medium`}>{suggestion.text}</span>
+              <span className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>{suggestion.description}</span>
             </button>
           ))}
         </div>
@@ -530,44 +597,20 @@ const CommandAutocomplete = ({ command, setCommand, disabled }) => {
   );
 };
 
-// Collapsible event group component for thinking pane
-const ThinkingEventGroup = ({ title, events, icon }) => {
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  
+// Theme toggle button component
+const ThemeToggle = ({ darkMode, toggleDarkMode }) => {
   return (
-    <div className="mb-4 border border-gray-200 rounded-lg overflow-hidden">
-      <button
-        onClick={() => setIsCollapsed(!isCollapsed)}
-        className="w-full flex items-center justify-between bg-gray-50 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors"
-      >
-        <div className="flex items-center">
-          {icon}
-          <span className="ml-2">{title}</span>
-          <span className="ml-2 bg-gray-200 text-gray-700 px-2 py-0.5 text-xs rounded-full">
-            {events.length}
-          </span>
-        </div>
-        <svg
-          className={`w-5 h-5 text-gray-500 transform transition-transform ${isCollapsed ? 'rotate-180' : ''}`}
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
-        </svg>
-      </button>
-      
-      {!isCollapsed && (
-        <div className="p-4 bg-white space-y-3">
-          {events.map((event, idx) => (
-            <div key={idx} className="pb-3 border-b border-gray-100 last:border-0 last:pb-0">
-              {renderEventContent(event)}
-            </div>
-          ))}
-        </div>
+    <button 
+      onClick={toggleDarkMode}
+      className="p-2 rounded-full focus:outline-none transition-colors"
+      aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+    >
+      {darkMode ? (
+        <FaSun className="text-yellow-400 text-xl" />
+      ) : (
+        <FaMoon className="text-indigo-600 text-xl" />
       )}
-    </div>
+    </button>
   );
 };
 
@@ -584,6 +627,7 @@ const AiAgentPage = () => {
   const [scanStartTime, setScanStartTime] = useState(null);
   const [scanProgress, setScanProgress] = useState(0);
   const [scanPhase, setScanPhase] = useState('');
+  const [darkMode, setDarkMode] = useState(false);
   
   // Connect to WebSocket
   const { connected, events } = useAgentWebSocket(sessionId);
@@ -782,20 +826,34 @@ const AiAgentPage = () => {
     return `${minutes}m ${remainingSeconds}s`;
   };
 
+  // Organize events by type for the thinking pane
+  const organizeEvents = (events) => {
+    const groups = {
+      llm: events.filter(e => e.type.startsWith('llm_')),
+      tool: events.filter(e => e.type.startsWith('tool_')),
+      agent: events.filter(e => e.type.startsWith('agent_')),
+      progress: events.filter(e => e.type === 'progress_update'),
+      error: events.filter(e => e.type === 'error'),
+      other: events.filter(e => !e.type.startsWith('llm_') && !e.type.startsWith('tool_') && !e.type.startsWith('agent_') && e.type !== 'progress_update' && e.type !== 'error')
+    };
+    
+    return groups;
+  };
+  
   // Render different event types in the thinking pane
-  const renderEventContent = (event) => {
+  const renderEventContent = (event, darkMode) => {
     switch (event.type) {
       case 'llm_start':
         return (
           <div className="flex items-start">
             <FaLightbulb className="mr-2 text-yellow-500 mt-1" />
-            <div className="text-gray-700">{event.content}</div>
+            <div className={`text-${darkMode ? 'gray-300' : 'gray-700'}`}>{event.content}</div>
           </div>
         );
       
       case 'llm_token':
         return (
-          <span className="text-gray-700">{event.content}</span>
+          <span className={`text-${darkMode ? 'gray-300' : 'gray-700'}`}>{event.content}</span>
         );
       
       case 'tool_start':
@@ -830,7 +888,7 @@ const AiAgentPage = () => {
         return (
           <div className="flex items-start">
             <FaInfoCircle className="mr-2 text-blue-500 mt-1" />
-            <div className="text-blue-700">{event.message}</div>
+            <div className={`text-${darkMode ? 'gray-300' : 'gray-700'}`}>{event.message}</div>
           </div>
         );
       
@@ -865,13 +923,13 @@ const AiAgentPage = () => {
         return (
           <div className="flex items-start">
             <FaExclamationTriangle className="mr-2 text-red-500 mt-1" />
-            <div className="text-red-600">{event.error}</div>
+            <div className={`text-${darkMode ? 'gray-300' : 'gray-700'}`}>{event.error}</div>
           </div>
         );
       
       default:
         return (
-          <div className="text-gray-500">
+          <div className={`text-${darkMode ? 'gray-300' : 'gray-700'}`}>
             {event.type}: {JSON.stringify(event)}
           </div>
         );
@@ -887,293 +945,334 @@ const AiAgentPage = () => {
     }
   };
 
-  // Organize events by type for the thinking pane
-  const organizeEvents = (events) => {
-    const groups = {
-      llm: events.filter(e => e.type.startsWith('llm_')),
-      tool: events.filter(e => e.type.startsWith('tool_')),
-      agent: events.filter(e => e.type.startsWith('agent_')),
-      progress: events.filter(e => e.type === 'progress_update'),
-      error: events.filter(e => e.type === 'error'),
-      other: events.filter(e => !e.type.startsWith('llm_') && !e.type.startsWith('tool_') && !e.type.startsWith('agent_') && e.type !== 'progress_update' && e.type !== 'error')
-    };
+  // Initialize dark mode from local storage or system preference
+  useEffect(() => {
+    // Check for saved preference
+    const savedDarkMode = localStorage.getItem('darkMode');
     
-    return groups;
+    if (savedDarkMode !== null) {
+      setDarkMode(savedDarkMode === 'true');
+    } else {
+      // Check for system preference
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      setDarkMode(prefersDark);
+    }
+  }, []);
+  
+  // Apply dark mode class to the document when it changes
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    
+    // Save preference
+    localStorage.setItem('darkMode', darkMode);
+  }, [darkMode]);
+  
+  // Toggle dark mode
+  const toggleDarkMode = () => {
+    setDarkMode(prev => !prev);
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center">
-            <FaRobot className="h-8 w-8 text-indigo-600 mr-3" />
-            <h1 className="text-3xl font-bold text-gray-800">AI Network Agent</h1>
-          </div>
-          <div className="text-sm">
-            {connected ? (
-              <span className="text-green-600 flex items-center">
-                <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
-                Connected
-              </span>
-            ) : (
-              <span className="text-red-600 flex items-center">
-                <span className="w-2 h-2 bg-red-500 rounded-full mr-2"></span>
-                Disconnected
-              </span>
-            )}
-          </div>
-        </div>
-
-        {error && (
-          <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
-            <div className="flex">
-              <FaExclamationTriangle className="text-red-500 mr-3" />
-              <div>
-                <p className="text-sm text-red-700">{error}</p>
+    <div className={`min-h-screen transition-colors duration-200 ${darkMode ? 'dark bg-gray-900' : 'bg-gray-100'}`}>
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center">
+              <FaRobot className={`h-8 w-8 ${darkMode ? 'text-indigo-400' : 'text-indigo-600'} mr-3`} />
+              <h1 className={`text-3xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>AI Network Agent</h1>
+            </div>
+            <div className="flex items-center space-x-4">
+              <div className="text-sm">
+                {connected ? (
+                  <span className={`${darkMode ? 'text-green-400' : 'text-green-600'} flex items-center`}>
+                    <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                    Connected
+                  </span>
+                ) : (
+                  <span className={`${darkMode ? 'text-red-400' : 'text-red-600'} flex items-center`}>
+                    <span className="w-2 h-2 bg-red-500 rounded-full mr-2"></span>
+                    Disconnected
+                  </span>
+                )}
               </div>
+              <ThemeToggle darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
             </div>
           </div>
-        )}
 
-        {progressMessage && (
-          <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
-            <div className="flex">
-              <FaInfoCircle className="text-blue-500 mr-3" />
-              <div>
-                <p className="text-sm text-blue-700">{progressMessage}</p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Enhanced Scan Progress Indicator */}
-        {scanInProgress && (
-          <div className="bg-indigo-50 border-l-4 border-indigo-500 p-4 mb-6">
-            <div className="flex flex-col">
-              <div className="flex items-start mb-2">
-                <FaCloudDownloadAlt className="text-indigo-500 mr-3 animate-pulse text-xl" />
-                <div className="flex-grow">
-                  <p className="text-sm text-indigo-700 font-medium flex justify-between">
-                    <span>{scanPhase || 'Network scan in progress...'}</span>
-                    <span className="font-semibold">Elapsed time: {formatDuration(scanDuration)}</span>
-                  </p>
-                  
-                  {/* Progress bar */}
-                  <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
-                    <div 
-                      className="bg-indigo-600 h-2.5 rounded-full transition-all duration-500 ease-out"
-                      style={{ width: `${scanProgress}%` }}
-                    ></div>
-                  </div>
+          {error && (
+            <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
+              <div className="flex">
+                <FaExclamationTriangle className="text-red-500 mr-3" />
+                <div>
+                  <p className="text-sm text-red-700">{error}</p>
                 </div>
               </div>
-              <div className="ml-8">
-                <p className="text-xs text-indigo-600 mt-1">
-                  <span className="text-indigo-800 font-medium">Target:</span> {command.replace(/^scan\s+|^run a .* scan on\s+/i, '')}
-                </p>
-                <p className="text-xs text-indigo-600">
-                  Comprehensive scans may take several minutes. The system will automatically simplify parameters if needed.
-                </p>
+            </div>
+          )}
+
+          {progressMessage && (
+            <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
+              <div className="flex">
+                <FaInfoCircle className="text-blue-500 mr-3" />
+                <div>
+                  <p className="text-sm text-blue-700">{progressMessage}</p>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Quick Actions Panel */}
-        <div className="bg-white rounded-lg shadow-md overflow-hidden mb-6">
-          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-3 flex items-center">
-            <FaRobot className="mr-2" />
-            <h2 className="text-lg font-semibold">Quick Actions</h2>
-          </div>
-          <div className="p-4 grid grid-cols-2 md:grid-cols-4 gap-3">
-            {quickActions.map((action, index) => (
-              <div key={index} className="relative group">
-                <button
-                  onClick={() => applyQuickAction(action.command)}
-                  disabled={isProcessing}
-                  className="w-full py-3 px-4 bg-gray-50 hover:bg-indigo-50 border border-gray-200 rounded-lg text-left transition-colors flex items-center"
-                >
-                  <span className="text-xl mr-2">{action.icon}</span>
-                  <span className="text-sm font-medium text-gray-700">{action.name}</span>
-                </button>
-                {/* Tooltip */}
-                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
-                  {action.tooltip}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Chat Pane */}
-          <div className="bg-white rounded-lg shadow-md overflow-hidden">
-            <div className="bg-indigo-600 text-white px-4 py-3 flex items-center">
-              <FaTerminal className="mr-2" />
-              <h2 className="text-lg font-semibold">Chat</h2>
-            </div>
-            
-            <div 
-              ref={chatBoxRef}
-              className="h-96 overflow-y-auto p-4 space-y-4 bg-gray-50"
-            >
-              {/* User command */}
-              {command && (
-                <div className="flex justify-end">
-                  <div className="bg-indigo-100 rounded-lg p-3 max-w-md">
-                    <p className="text-gray-800">{command}</p>
-                  </div>
-                </div>
-              )}
-              
-              {/* Agent response */}
-              {(isProcessing || finalResult) && (
-                <div className="flex justify-start">
-                  <div className="bg-white rounded-lg p-3 max-w-md shadow-sm">
-                    {isProcessing ? (
-                      <div className="flex items-center text-gray-600">
-                        <FaSpinner className="animate-spin mr-2" />
-                        <p>Processing your request...</p>
-                      </div>
-                    ) : finalResult ? (
-                      <p className="text-gray-800 whitespace-pre-line">{finalResult}</p>
-                    ) : null}
-                  </div>
-                </div>
-              )}
-            </div>
-            
-            {/* Visualization Component */}
-            {finalResult && !isProcessing && (
-              <ScanResultVisualizer result={finalResult} />
-            )}
-            
-            <div className="border-t border-gray-200 p-4">
-              {/* Command History Dropdown */}
-              {commandHistory.length > 0 && (
-                <div className="mb-2 relative">
-                  <button
-                    onClick={() => setShowHistory(!showHistory)}
-                    className="text-xs flex items-center text-gray-600 hover:text-indigo-600 transition-colors mb-1"
-                  >
-                    <FaHistory className="mr-1" />
-                    <span>Command History</span>
-                    <FaChevronUp className={`ml-1 transform ${showHistory ? '' : 'rotate-180'}`} />
-                  </button>
-                  
-                  {showHistory && (
-                    <div className="absolute z-10 left-0 right-0 bg-white border border-gray-200 rounded-md shadow-lg py-1 max-h-40 overflow-y-auto">
-                      {commandHistory.map((cmd, index) => (
-                        <button
-                          key={index}
-                          onClick={() => selectHistoryCommand(cmd)}
-                          className="block w-full text-left px-3 py-1 text-sm hover:bg-indigo-50 text-gray-800 truncate"
-                        >
-                          {cmd}
-                        </button>
-                      ))}
+          {/* Enhanced Scan Progress Indicator */}
+          {scanInProgress && (
+            <div className="bg-indigo-50 border-l-4 border-indigo-500 p-4 mb-6">
+              <div className="flex flex-col">
+                <div className="flex items-start mb-2">
+                  <FaCloudDownloadAlt className="text-indigo-500 mr-3 animate-pulse text-xl" />
+                  <div className="flex-grow">
+                    <p className="text-sm text-indigo-700 font-medium flex justify-between">
+                      <span>{scanPhase || 'Network scan in progress...'}</span>
+                      <span className="font-semibold">Elapsed time: {formatDuration(scanDuration)}</span>
+                    </p>
+                    
+                    {/* Progress bar */}
+                    <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
+                      <div 
+                        className="bg-indigo-600 h-2.5 rounded-full transition-all duration-500 ease-out"
+                        style={{ width: `${scanProgress}%` }}
+                      ></div>
                     </div>
-                  )}
+                  </div>
                 </div>
-              )}
-              
-              <form onSubmit={handleSubmit} className="flex">
-                <CommandAutocomplete 
-                  command={command}
-                  setCommand={setCommand}
-                  disabled={isProcessing}
-                />
-              </form>
-              
-              <div className="mt-2 text-xs text-gray-500 flex items-center">
-                <FaSearch className="text-gray-400 mr-1" />
-                <p>Try commands like: "scan example.com for open ports" or "run a quick scan on 8.8.8.8"</p>
+                <div className="ml-8">
+                  <p className="text-xs text-indigo-600 mt-1">
+                    <span className="text-indigo-800 font-medium">Target:</span> {command.replace(/^scan\s+|^run a .* scan on\s+/i, '')}
+                  </p>
+                  <p className="text-xs text-indigo-600">
+                    Comprehensive scans may take several minutes. The system will automatically simplify parameters if needed.
+                  </p>
+                </div>
               </div>
+            </div>
+          )}
+
+          {/* Quick Actions Panel */}
+          <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white'} rounded-lg shadow-md overflow-hidden mb-6 transition-colors`}>
+            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-3 flex items-center">
+              <FaRobot className="mr-2" />
+              <h2 className="text-lg font-semibold">Quick Actions</h2>
+            </div>
+            <div className="p-4 grid grid-cols-2 md:grid-cols-4 gap-3">
+              {quickActions.map((action, index) => (
+                <div key={index} className="relative group">
+                  <button
+                    onClick={() => applyQuickAction(action.command)}
+                    disabled={isProcessing}
+                    className={`w-full py-3 px-4 ${darkMode 
+                      ? 'bg-gray-700 hover:bg-gray-600 border-gray-600 text-gray-200' 
+                      : 'bg-gray-50 hover:bg-indigo-50 border-gray-200 text-gray-700'
+                    } border rounded-lg text-left transition-colors flex items-center`}
+                  >
+                    <span className="text-xl mr-2">{action.icon}</span>
+                    <span className="text-sm font-medium">{action.name}</span>
+                  </button>
+                  {/* Tooltip */}
+                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+                    {action.tooltip}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
-          
-          {/* Enhanced Thinking Pane */}
-          <div className="bg-white rounded-lg shadow-md overflow-hidden">
-            <div className="bg-purple-600 text-white px-4 py-3 flex items-center justify-between">
-              <div className="flex items-center">
-                <FaLightbulb className="mr-2" />
-                <h2 className="text-lg font-semibold">Thinking Process</h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Chat Pane */}
+            <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white'} rounded-lg shadow-md overflow-hidden transition-colors`}>
+              <div className="bg-indigo-600 text-white px-4 py-3 flex items-center">
+                <FaTerminal className="mr-2" />
+                <h2 className="text-lg font-semibold">Chat</h2>
               </div>
               
-              {events.length > 0 && (
-                <div className="text-xs bg-purple-700 rounded-full px-2 py-1">
-                  {events.length} events
-                </div>
+              <div 
+                ref={chatBoxRef}
+                className={`h-96 overflow-y-auto p-4 space-y-4 ${darkMode ? 'bg-gray-700' : 'bg-gray-50'} transition-colors`}
+              >
+                {/* User command */}
+                {command && (
+                  <div className="flex justify-end">
+                    <div className={`${darkMode ? 'bg-indigo-900' : 'bg-indigo-100'} rounded-lg p-3 max-w-md transition-colors`}>
+                      <p className={`${darkMode ? 'text-indigo-100' : 'text-gray-800'}`}>{command}</p>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Agent response */}
+                {(isProcessing || finalResult) && (
+                  <div className="flex justify-start">
+                    <div className={`${darkMode ? 'bg-gray-800 shadow-gray-900' : 'bg-white'} rounded-lg p-3 max-w-md shadow-sm transition-colors`}>
+                      {isProcessing ? (
+                        <div className={`flex items-center ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                          <FaSpinner className="animate-spin mr-2" />
+                          <p>Processing your request...</p>
+                        </div>
+                      ) : finalResult ? (
+                        <p className={`${darkMode ? 'text-gray-200' : 'text-gray-800'} whitespace-pre-line`}>{finalResult}</p>
+                      ) : null}
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              {/* Adjust ScanResultVisualizer for dark mode in a separate edit */}
+              {finalResult && !isProcessing && (
+                <ScanResultVisualizer result={finalResult} darkMode={darkMode} />
               )}
+              
+              <div className={`border-t ${darkMode ? 'border-gray-700' : 'border-gray-200'} p-4 transition-colors`}>
+                {/* Command History Dropdown */}
+                {commandHistory.length > 0 && (
+                  <div className="mb-2 relative">
+                    <button
+                      onClick={() => setShowHistory(!showHistory)}
+                      className={`text-xs flex items-center ${darkMode ? 'text-gray-400 hover:text-indigo-400' : 'text-gray-600 hover:text-indigo-600'} transition-colors mb-1`}
+                    >
+                      <FaHistory className="mr-1" />
+                      <span>Command History</span>
+                      <FaChevronUp className={`ml-1 transform ${showHistory ? '' : 'rotate-180'}`} />
+                    </button>
+                    
+                    {showHistory && (
+                      <div className={`absolute z-10 left-0 right-0 ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-md shadow-lg py-1 max-h-40 overflow-y-auto transition-colors`}>
+                        {commandHistory.map((cmd, index) => (
+                          <button
+                            key={index}
+                            onClick={() => selectHistoryCommand(cmd)}
+                            className={`block w-full text-left px-3 py-1 text-sm ${darkMode 
+                              ? 'hover:bg-gray-700 text-gray-200' 
+                              : 'hover:bg-indigo-50 text-gray-800'
+                            } truncate transition-colors`}
+                          >
+                            {cmd}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+                
+                <form onSubmit={handleSubmit} className="flex">
+                  <CommandAutocomplete 
+                    command={command}
+                    setCommand={setCommand}
+                    disabled={isProcessing}
+                    darkMode={darkMode}
+                  />
+                </form>
+                
+                <div className={`mt-2 text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'} flex items-center transition-colors`}>
+                  <FaSearch className={`${darkMode ? 'text-gray-500' : 'text-gray-400'} mr-1`} />
+                  <p>Try commands like: "scan example.com for open ports" or "run a quick scan on 8.8.8.8"</p>
+                </div>
+              </div>
             </div>
             
-            <div 
-              ref={thinkingBoxRef}
-              className="h-96 overflow-y-auto p-4 space-y-4 bg-gray-50 font-mono text-sm"
-            >
-              {events.length === 0 ? (
-                <div className="text-center text-gray-500 mt-10">
-                  <p>The agent's thought process will appear here</p>
+            {/* Enhanced Thinking Pane */}
+            <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white'} rounded-lg shadow-md overflow-hidden transition-colors`}>
+              <div className="bg-purple-600 text-white px-4 py-3 flex items-center justify-between">
+                <div className="flex items-center">
+                  <FaLightbulb className="mr-2" />
+                  <h2 className="text-lg font-semibold">Thinking Process</h2>
                 </div>
-              ) : (
-                <>
-                  {/* Group events by type */}
-                  {(() => {
-                    const groups = organizeEvents(events);
-                    return (
-                      <>
-                        {groups.llm.length > 0 && (
-                          <ThinkingEventGroup 
-                            title="AI Thinking" 
-                            events={groups.llm}
-                            icon={<FaLightbulb className="text-yellow-500" />}
-                          />
-                        )}
-                        
-                        {groups.tool.length > 0 && (
-                          <ThinkingEventGroup 
-                            title="Tool Usage" 
-                            events={groups.tool}
-                            icon={<FaCode className="text-blue-500" />}
-                          />
-                        )}
-                        
-                        {groups.agent.length > 0 && (
-                          <ThinkingEventGroup 
-                            title="Agent Actions" 
-                            events={groups.agent}
-                            icon={<FaRobot className="text-purple-500" />}
-                          />
-                        )}
-                        
-                        {groups.progress.length > 0 && (
-                          <ThinkingEventGroup 
-                            title="Progress Updates" 
-                            events={groups.progress}
-                            icon={<FaInfoCircle className="text-blue-500" />}
-                          />
-                        )}
-                        
-                        {groups.error.length > 0 && (
-                          <ThinkingEventGroup 
-                            title="Errors" 
-                            events={groups.error}
-                            icon={<FaExclamationTriangle className="text-red-500" />}
-                          />
-                        )}
-                        
-                        {groups.other.length > 0 && (
-                          <ThinkingEventGroup 
-                            title="Other Events" 
-                            events={groups.other}
-                            icon={<FaTerminal className="text-gray-500" />}
-                          />
-                        )}
-                      </>
-                    );
-                  })()}
-                </>
-              )}
+                
+                {events.length > 0 && (
+                  <div className="text-xs bg-purple-700 rounded-full px-2 py-1">
+                    {events.length} events
+                  </div>
+                )}
+              </div>
+              
+              <div 
+                ref={thinkingBoxRef}
+                className={`h-96 overflow-y-auto p-4 space-y-4 ${darkMode ? 'bg-gray-700' : 'bg-gray-50'} font-mono text-sm transition-colors`}
+              >
+                {events.length === 0 ? (
+                  <div className={`text-center ${darkMode ? 'text-gray-400' : 'text-gray-500'} mt-10 transition-colors`}>
+                    <p>The agent's thought process will appear here</p>
+                  </div>
+                ) : (
+                  <>
+                    {/* Group events by type */}
+                    {(() => {
+                      const groups = organizeEvents(events);
+                      return (
+                        <>
+                          {groups.llm.length > 0 && (
+                            <ThinkingEventGroup 
+                              title="AI Thinking" 
+                              events={groups.llm}
+                              icon={<FaLightbulb className="text-yellow-500" />}
+                              renderEventContent={renderEventContent}
+                              darkMode={darkMode}
+                            />
+                          )}
+                          
+                          {groups.tool.length > 0 && (
+                            <ThinkingEventGroup 
+                              title="Tool Usage" 
+                              events={groups.tool}
+                              icon={<FaCode className="text-blue-500" />}
+                              renderEventContent={renderEventContent}
+                              darkMode={darkMode}
+                            />
+                          )}
+                          
+                          {groups.agent.length > 0 && (
+                            <ThinkingEventGroup 
+                              title="Agent Actions" 
+                              events={groups.agent}
+                              icon={<FaRobot className="text-purple-500" />}
+                              renderEventContent={renderEventContent}
+                              darkMode={darkMode}
+                            />
+                          )}
+                          
+                          {groups.progress.length > 0 && (
+                            <ThinkingEventGroup 
+                              title="Progress Updates" 
+                              events={groups.progress}
+                              icon={<FaInfoCircle className="text-blue-500" />}
+                              renderEventContent={renderEventContent}
+                              darkMode={darkMode}
+                            />
+                          )}
+                          
+                          {groups.error.length > 0 && (
+                            <ThinkingEventGroup 
+                              title="Errors" 
+                              events={groups.error}
+                              icon={<FaExclamationTriangle className="text-red-500" />}
+                              renderEventContent={renderEventContent}
+                              darkMode={darkMode}
+                            />
+                          )}
+                          
+                          {groups.other.length > 0 && (
+                            <ThinkingEventGroup 
+                              title="Other Events" 
+                              events={groups.other}
+                              icon={<FaTerminal className="text-gray-500" />}
+                              renderEventContent={renderEventContent}
+                              darkMode={darkMode}
+                            />
+                          )}
+                        </>
+                      );
+                    })()}
+                  </>
+                )}
+              </div>
             </div>
           </div>
         </div>
