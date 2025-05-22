@@ -9,6 +9,7 @@ import AboutPage from './pages/AboutPage';
 import AdminPage from './pages/AdminPage';
 import AutoHackerPage from './pages/AutoHackerPage';
 import AutoHackerInfoPage from './pages/AutoHackerInfoPage';
+import AiAgentPage from './pages/AiAgentPage';
 import './App.css';
 
 function App() {
@@ -25,6 +26,7 @@ function App() {
             <Route path="/admin" element={<AdminPage />} />
             <Route path="/auto-hacker" element={<AutoHackerPage />} />
             <Route path="/auto-hacker-info" element={<AutoHackerInfoPage />} />
+            <Route path="/ai-agent" element={<AiAgentPage />} />
           </Routes>
         </main>
         <Footer />

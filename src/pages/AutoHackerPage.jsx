@@ -26,20 +26,14 @@ const AutoHackerPage = () => {
       setScanProgress(statusData.progress);
       setCurrentStage(statusData.currentStage);
 
-      // Update stage results if available
+      // Update stage results if available (server now returns cumulative object)
       if (statusData.stageResults) {
-        setStageResults(prev => ({
-          ...prev,
-          [statusData.currentStage]: statusData.stageResults
-        }));
+        setStageResults(statusData.stageResults);
       }
 
       // Update AI insights if available
       if (statusData.aiInsights) {
-        setAiInsights(prev => ({
-          ...prev,
-          [statusData.currentStage]: statusData.aiInsights
-        }));
+        setAiInsights(statusData.aiInsights);
       }
 
       if (statusData.status === 'completed' || statusData.status === 'failed') {
