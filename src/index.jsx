@@ -5,7 +5,7 @@ import './App.css';
 import axios from 'axios';
 
 // Set default base URL for API requests
-axios.defaults.baseURL = 'http://localhost:5000';
+axios.defaults.baseURL = 'https://netviz-backend.onrender.com';
 axios.defaults.withCredentials = true;
 
 const root = ReactDOM.createRoot(document.getElementById('root'));

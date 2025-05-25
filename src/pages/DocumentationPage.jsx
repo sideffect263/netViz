@@ -14,7 +14,10 @@ import {
   FaBook,
   FaQuestionCircle,
   FaHandPaper,
-  FaCogs
+  FaCogs,
+  FaBrain,
+  FaPuzzlePiece,
+  FaTasks
 } from 'react-icons/fa';
 
 const DocumentationPage = () => {
@@ -23,6 +26,9 @@ const DocumentationPage = () => {
     scans: false,
     commands: false,
     tech: false,
+    langchain: false,
+    toolChoice: false,
+    agentMind: false,
     faq: false
   });
 
@@ -66,6 +72,18 @@ const DocumentationPage = () => {
             <a href="#tech" className="text-indigo-600 dark:text-indigo-400 hover:underline flex items-center">
               <FaCode className="mr-2" />
               Technical Information
+            </a>
+            <a href="#langchain" className="text-indigo-600 dark:text-indigo-400 hover:underline flex items-center">
+              <FaPuzzlePiece className="mr-2" />
+              The Langchain Framework
+            </a>
+            <a href="#toolChoice" className="text-indigo-600 dark:text-indigo-400 hover:underline flex items-center">
+              <FaTasks className="mr-2" />
+              How the Agent Chooses Tools
+            </a>
+            <a href="#agentMind" className="text-indigo-600 dark:text-indigo-400 hover:underline flex items-center">
+              <FaBrain className="mr-2" />
+              Visualizing the Agent's Mind
             </a>
             <a href="#faq" className="text-indigo-600 dark:text-indigo-400 hover:underline flex items-center">
               <FaQuestionCircle className="mr-2" />
@@ -366,8 +384,8 @@ const DocumentationPage = () => {
               <ul className="list-disc pl-6 space-y-2 text-gray-600 dark:text-gray-300">
                 <li><span className="font-medium">AI Agent</span>: Powered by Anthropic's Claude model through LangChain, providing natural language understanding and generation</li>
                 <li><span className="font-medium">WebSocket Connection</span>: Real-time communication channel that streams thinking process and results to the UI</li>
-                <li><span className="font-medium">Nmap Integration</span>: Security scanner utility accessed through a Model Context Protocol (MCP) client</li>
-                <li><span className="font-medium">Visualization Components</span>: React-based UI components that render scan results in a user-friendly format</li>
+                <li><span className="font-medium">Nmap Integration</span>: Security scanner utility accessed through a Model Context Protocol (MCP) client for Nmap, and a separate MCP client for OSINT tools.</li>
+                <li><span className="font-medium">Visualization Components</span>: React-based UI components that render scan results and AI analysis in a user-friendly format</li>
                 <li><span className="font-medium">Command History</span>: System that tracks and allows reuse of previous commands</li>
                 <li><span className="font-medium">Dark Mode</span>: User interface feature for comfortable viewing in different lighting conditions</li>
                 <li><span className="font-medium">Progress Tracking</span>: Visual indicators showing scan progress and estimated completion time</li>
@@ -381,6 +399,180 @@ const DocumentationPage = () => {
                   <li>Proper permissions for performing scans</li>
                 </ul>
               </div>
+            </div>
+          )}
+        </div>
+
+        {/* Langchain Framework Section */}
+        <div id="langchain" className="mb-10">
+          <div 
+            className="flex items-center justify-between bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm mb-2 cursor-pointer"
+            onClick={() => toggleSection('langchain')}
+          >
+            <h2 className="text-xl font-bold text-gray-800 dark:text-white flex items-center">
+              <FaPuzzlePiece className="mr-2 text-indigo-600 dark:text-indigo-400" />
+              The Langchain Framework
+            </h2>
+            {expandedSections.langchain ? <FaChevronDown className="text-gray-500" /> : <FaChevronRight className="text-gray-500" />}
+          </div>
+          
+          {expandedSections.langchain && (
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+              <p className="text-gray-600 dark:text-gray-300 mb-4">
+                Langchain.js plays a pivotal role in the NetViz AI Agent, acting as the central nervous system that orchestrates its operations. 
+                It provides a robust framework for building applications powered by Large Language Models (LLMs), like Anthropic's Claude.
+              </p>
+              
+              <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mt-6 mb-3 flex items-center">
+                <FaCogs className="mr-2 text-indigo-500" />
+                Key Roles of Langchain:
+              </h4>
+              <ul className="list-disc pl-6 space-y-3 text-gray-600 dark:text-gray-300">
+                <li>
+                  <span className="font-medium">LLM Abstraction:</span> Simplifies interaction with the Claude LLM, handling API calls and responses.
+                </li>
+                <li>
+                  <span className="font-medium">Tool Management:</span> Allows defining and managing custom tools (e.g., NmapScanner, WhoisLookup). The agent can decide which tool to use based on the user's command and the tool's description.
+                </li>
+                <li>
+                  <span className="font-medium">Agent Framework:</span> Provides the "AgentExecutor," a core loop that facilitates the agent's reasoning process:
+                  <ol className="list-decimal pl-6 mt-2 space-y-1 text-sm">
+                    <li>Receives user input.</li>
+                    <li>LLM analyzes input and decides on an action (respond or use a tool).</li>
+                    <li>If a tool is chosen, Langchain executes it.</li>
+                    <li>Tool output is fed back to the LLM for further processing or generating a final answer.</li>
+                  </ol>
+                </li>
+                <li>
+                  <span className="font-medium">Callback System:</span> Enables real-time streaming of the agent's internal processes (thoughts, tool usage) to the frontend via WebSockets, enhancing transparency.
+                </li>
+                <li>
+                  <span className="font-medium">Conversation Memory:</span> Helps maintain context by managing conversation history, allowing for more coherent and informed interactions over time.
+                </li>
+              </ul>
+              <p className="text-gray-600 dark:text-gray-300 mt-4">
+                Essentially, Langchain provides the essential building blocks and runtime environment that connect the LLM, our custom tools, and user interactions, enabling the sophisticated capabilities of the NetViz AI Agent.
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* How Agent Chooses Tools Section */}
+        <div id="toolChoice" className="mb-10">
+          <div 
+            className="flex items-center justify-between bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm mb-2 cursor-pointer"
+            onClick={() => toggleSection('toolChoice')}
+          >
+            <h2 className="text-xl font-bold text-gray-800 dark:text-white flex items-center">
+              <FaTasks className="mr-2 text-indigo-600 dark:text-indigo-400" />
+              How the Agent Chooses Tools
+            </h2>
+            {expandedSections.toolChoice ? <FaChevronDown className="text-gray-500" /> : <FaChevronRight className="text-gray-500" />}
+          </div>
+          
+          {expandedSections.toolChoice && (
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+              <p className="text-gray-600 dark:text-gray-300 mb-4">
+                The NetViz AI Agent's ability to select the appropriate tool for a given task is a critical aspect of its intelligence. 
+                This process is not hardcoded but relies on the LLM's understanding and reasoning capabilities, guided by information we provide.
+              </p>
+              
+              <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mt-6 mb-3 flex items-center">
+                <FaSearch className="mr-2 text-indigo-500" />
+                The Selection Process:
+              </h4>
+              <ol className="list-decimal pl-6 space-y-3 text-gray-600 dark:text-gray-300">
+                <li>
+                  <span className="font-medium">User Command Analysis:</span> The LLM first analyzes the user's natural language command to understand the intent and the desired outcome.
+                </li>
+                <li>
+                  <span className="font-medium">Tool Descriptions are Key:</span> Each tool available to the agent (e.g., `NmapScanner`, `WhoisLookup`, `DNSRecon`) is defined with a detailed description. These descriptions explain what the tool does, its typical use cases, and sometimes even example inputs. 
+                  The LLM matches the user's intent against these descriptions.
+                </li>
+                <li>
+                  <span className="font-medium">System Prompt Guidance:</span> A carefully crafted system prompt provides overall instructions to the agent, including a list of available tools and general advice on how to behave. The documentation loaded into `agent_documentation.md` further enriches this context.
+                </li>
+                <li>
+                  <span className="font-medium">Reasoning and Decision:</span> Based on the command, tool descriptions, and system prompt, the LLM reasons about which tool (if any) is best suited to achieve the user's goal. It might also determine necessary parameters for the tool.
+                </li>
+                <li>
+                  <span className="font-medium">Tool Invocation via Langchain:</span> Once a tool is selected, Langchain facilitates its execution. The actual interaction with external services (like Nmap or OSINT utilities via MCP clients) happens within the tool's specific function.
+                </li>
+              </ol>
+              
+              <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mt-6 mb-3 flex items-center">
+                <FaBolt className="mr-2 text-yellow-500" />
+                Improving Tool Selection:
+              </h4>
+              <p className="text-gray-600 dark:text-gray-300 mb-2">
+                The accuracy of tool selection can be enhanced by:
+              </p>
+              <ul className="list-disc pl-6 space-y-2 text-gray-600 dark:text-gray-300 text-sm">
+                <li>Writing clear, concise, and highly descriptive tool descriptions.</li>
+                <li>Ensuring distinct differences between tools are highlighted in their descriptions.</li>
+                <li>Continuously refining the system prompt for better contextual understanding.</li>
+              </ul>
+              <p className="text-gray-600 dark:text-gray-300 mt-4">
+                The LLM doesn't "know" about MCP servers directly. It selects a Langchain tool object, and the code implementing that tool handles the communication with the respective MCP client and underlying service.
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Visualizing the Agent's Mind Section */}
+        <div id="agentMind" className="mb-10">
+          <div 
+            className="flex items-center justify-between bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm mb-2 cursor-pointer"
+            onClick={() => toggleSection('agentMind')}
+          >
+            <h2 className="text-xl font-bold text-gray-800 dark:text-white flex items-center">
+              <FaBrain className="mr-2 text-indigo-600 dark:text-indigo-400" />
+              Visualizing the Agent's Mind
+            </h2>
+            {expandedSections.agentMind ? <FaChevronDown className="text-gray-500" /> : <FaChevronRight className="text-gray-500" />}
+          </div>
+          
+          {expandedSections.agentMind && (
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+              <p className="text-gray-600 dark:text-gray-300 mb-4">
+                To provide transparency into the AI Agent's operations, NetViz offers a unique "AI Security Analysis" pane. 
+                This pane visualizes the agent's thinking process, tool interactions, and intermediate analysis steps in real-time.
+              </p>
+              
+              <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mt-6 mb-3 flex items-center">
+                <FaNetworkWired className="mr-2 text-indigo-500" />
+                How it Works:
+              </h4>
+              <ul className="list-disc pl-6 space-y-3 text-gray-600 dark:text-gray-300">
+                <li>
+                  <span className="font-medium">WebSocket Streaming:</span> The backend (`aiAgentService.js`) uses a `WebSocketCallbackHandler` integrated with Langchain. This handler captures various events during the agent's execution.
+                </li>
+                <li>
+                  <span className="font-medium">Event Types:</span> Key events streamed include:
+                    <ul className="list-disc pl-6 mt-1 space-y-1 text-sm">
+                      <li>`llm_start` / `llm_end`: Marks the beginning and end of the LLM's thinking phases.</li>
+                      <li>`llm_token`: Streams individual pieces (tokens) of the LLM's generated text as it thinks or forms a response.</li>
+                      <li>`tool_start` / `tool_end`: Indicates when a tool (e.g., NmapScanner) is invoked and when it completes, including its output.</li>
+                      <li>`agent_action`: Shows the specific action the agent decides to take, like which tool to use and with what input.</li>
+                    </ul>
+                </li>
+                <li>
+                  <span className="font-medium">Frontend Processing:</span> The `AiAgentPage.jsx` receives these events via a WebSocket connection managed by the `useAgentWebSocket` hook.
+                </li>
+                <li>
+                  <span className="font-medium">AI Analysis Viewer:</span> The `AIAnalysisViewer.jsx` component processes these raw events, translating them into a more human-readable format. It identifies:
+                    <ul className="list-disc pl-6 mt-1 space-y-1 text-sm">
+                      <li>Reasoning steps and thoughts extracted from agent logs.</li>
+                      <li>Observations made from tool outputs.</li>
+                      <li>Specific tools being deployed.</li>
+                      <li>Summaries and insights generated by the LLM.</li>
+                    </ul>
+                </li>
+              </ul>
+              <p className="text-gray-600 dark:text-gray-300 mt-4">
+                This "behind-the-scenes" view helps users understand how the agent arrives at its conclusions, builds trust, and can aid in debugging or refining agent behavior. 
+                It transforms the agent from a "black box" into a more interpretable system.
+              </p>
             </div>
           )}
         </div>
