@@ -8,7 +8,9 @@ export default defineConfig({
     port: 3000,
     proxy: {
       '/api': {
-        target: 'https://netviz-backend.onrender.com',
+        target: process.env.NODE_ENV === 'development' 
+          ? 'http://localhost:5000'
+          : 'https://netviz-backend.onrender.com',
         changeOrigin: true,
         secure: true
       }
