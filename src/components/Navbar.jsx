@@ -35,14 +35,7 @@ const Navbar = () => {
               >
                 Home
               </Link>
-              <Link
-                to="/scan"
-                className={`${isActive('/scan')} inline-flex items-center px-1 pt-1 border-b-2 ${
-                  location.pathname === '/scan' ? 'border-indigo-500' : 'border-transparent'
-                } text-sm font-medium`}
-              >
-                Scan
-              </Link>
+             
           
               <Link
                 to="/ai-agent"
