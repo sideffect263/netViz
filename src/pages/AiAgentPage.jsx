@@ -6,7 +6,7 @@ import AIAnalysisViewer from '../components/AIAnalysisViewer';
 import RawScanDataViewer from '../components/RawScanDataViewer';
 import PageHeader from '../components/PageHeader';
 import StatusIndicators from '../components/StatusIndicators';
-import QuickActionsPanel from '../components/QuickActionsPanel';
+import TargetIntelligenceDashboard from '../components/TargetIntelligenceDashboard';
 import AgentChatPane from '../components/AgentChatPane';
 import useAiAgentState from '../hooks/useAiAgentState';
 
@@ -138,12 +138,12 @@ const AiAgentPage = () => {
             
             {/* Main Content */}
             <div className={`flex-1 transition-all duration-300 ${sidebarCollapsed ? 'md:ml-0' : 'md:ml-6'}`}>
-              {/* Quick Actions Panel */}
-              <QuickActionsPanel
-                quickActions={quickActions}
-                applyQuickAction={applyQuickAction}
-                isProcessing={isProcessing}
+              {/* Target Intelligence Dashboard */}
+              <TargetIntelligenceDashboard
+                messages={messages}
+                events={events}
                 darkMode={darkMode}
+                isProcessing={isProcessing}
               />
 
               {/* Three Panes Grid */}

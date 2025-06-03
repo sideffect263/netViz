@@ -57,18 +57,6 @@ const useAiAgentState = () => {
   const chatBoxRef = useRef(null);
   const thinkingBoxRef = useRef(null);
 
-  // Predefined quick action scan templates
-  const quickActions = [
-    { name: "Quick Scan", command: "run a quick scan on ", icon: "⚡", tooltip: "Fast scan of common ports" },
-    { name: "Service Scan", command: "scan for services on ", icon: "🔍", tooltip: "Identify running services on common ports" },
-    { name: "Full Port Scan", command: "run a comprehensive port scan on ", icon: "🔐", tooltip: "Scan all ports (takes longer)" },
-    { name: "Vulnerability Scan", command: "check for vulnerabilities on ", icon: "🛡️", tooltip: "Scan for common vulnerabilities" },
-    { name: "WHOIS Lookup", command: "get WHOIS information for ", icon: "📋", tooltip: "Domain registration and ownership info" },
-    { name: "DNS Analysis", command: "perform DNS reconnaissance on ", icon: "🌐", tooltip: "Comprehensive DNS record analysis" },
-    { name: "OSINT Overview", command: "perform comprehensive OSINT analysis on ", icon: "🕵️", tooltip: "Complete intelligence gathering with all tools" },
-    { name: "Typosquatting Check", command: "check for typosquatting domains similar to ", icon: "🎯", tooltip: "Find potential phishing domains" }
-  ];
-
   // Auto-scroll chat and thinking panes
   useEffect(() => {
     if (chatBoxRef.current) {
@@ -283,14 +271,6 @@ const useAiAgentState = () => {
     setShowHistory(false);
   };
 
-  const applyQuickAction = (actionCommand) => {
-    setCommand(actionCommand);
-    const inputElement = document.getElementById('command-input');
-    if (inputElement) {
-      inputElement.focus();
-    }
-  };
-
   const toggleDarkMode = () => {
     setDarkMode(prev => !prev);
   };
@@ -354,12 +334,10 @@ const useAiAgentState = () => {
     thinkingBoxRef,
     
     // Data
-    quickActions,
     
     // Handlers
     handleSubmit,
     selectHistoryCommand,
-    applyQuickAction,
     toggleDarkMode,
     handleHelpOptionSelect,
     toggleHelpTool

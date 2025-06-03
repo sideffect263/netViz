@@ -93,7 +93,7 @@ const ConversationSidebar = ({
         </div>
       </div>
       
-      <div className="flex-grow overflow-y-auto">
+      <div className="flex-grow overflow-y-auto max-h-[700px]">
         {loading ? (
           <div className="flex justify-center p-4">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-500"></div>
